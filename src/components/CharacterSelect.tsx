@@ -9,6 +9,9 @@ export const characters: Character[] = [
   { name: 'Zane', color: 0x486f52, colorHex: '#486f52', skill: 'The night tracker' },
   { name: 'Elena', color: 0xb56d32, colorHex: '#b56d32', skill: 'The brave medic' },
   { name: 'Kai', color: 0x733f45, colorHex: '#733f45', skill: 'The lost detective' },
+  { name: 'Sofia', color: 0x2f6870, colorHex: '#2f6870', skill: 'The fearless climber' },
+  { name: 'Leo', color: 0x7b6335, colorHex: '#7b6335', skill: 'The quick escape artist' },
+  { name: 'Amara', color: 0x70436a, colorHex: '#70436a', skill: 'The mystery researcher' },
 ]
 
 type Props = { onSelect: (character: Character) => void }
