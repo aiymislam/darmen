@@ -21,7 +21,7 @@ export default function App() {
         ? [...current.keys, player]
         : current.keys
       const firstMonsterStep = moveMonster(current.monster, player, steps, level)
-      const monster = firstMonsterStep === player
+      const monster = firstMonsterStep === player || steps % 2 !== 0
         ? firstMonsterStep
         : moveMonster(firstMonsterStep, player, steps, level)
       const caught = monster === player
