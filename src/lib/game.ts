@@ -12,17 +12,18 @@ export type GameState = {
   status: GameStatus
 }
 
-export const SIZE = 11
-const wallSets = [
-  [12,13,14,16,18,20,23,27,29,31,34,35,36,38,40,42,45,49,51,53,56,57,58,60,62,64,67,71,73,75,78,79,80,82,84,86,89,93,95,97,100,102,104,106,107,108],
-  [12,14,16,18,19,20,23,24,25,29,31,34,36,38,40,42,45,47,49,53,56,58,60,62,64,67,68,69,73,75,78,80,82,84,86,89,91,93,97,100,102,104,106,108],
-  [12,13,14,18,20,23,25,27,29,34,36,38,40,42,45,46,47,51,53,56,58,60,62,64,67,69,71,75,78,80,82,84,86,89,90,91,95,97,100,102,104,106,108],
-]
+export const SIZE = 15
+const dividerColumns = [2, 4, 6, 8, 10, 12]
+const makeMaze = (gaps: number[]) => new Set(
+  dividerColumns.flatMap((column, index) =>
+    Array.from({ length: SIZE }, (_, row) => row === gaps[index] ? -1 : row * SIZE + column),
+  ).filter((cell) => cell >= 0),
+)
 
 export const levels: Level[] = [
-  { name: 'The Abandoned Ward', start: 111, monster: 11, exit: 9, keys: [33, 87], walls: new Set(wallSets[0]), speed: 3, color: 0xe98566 },
-  { name: 'The Flooded Cells', start: 119, monster: 1, exit: 11, keys: [9, 55, 99], walls: new Set(wallSets[1]), speed: 2, color: 0x56a7b8 },
-  { name: 'The Crimson Crypt', start: 110, monster: 10, exit: 0, keys: [22, 54, 88, 118], walls: new Set(wallSets[2]), speed: 2, color: 0xd44537 },
+  { name: 'The Abandoned Ward', start: 211, monster: 1, exit: 13, keys: [168, 112, 56], walls: makeMaze([2, 12, 3, 11, 4, 10]), speed: 4, color: 0xe98566 },
+  { name: 'The Flooded Cells', start: 223, monster: 13, exit: 1, keys: [206, 142, 78], walls: makeMaze([11, 3, 12, 4, 10, 2]), speed: 3, color: 0x56a7b8 },
+  { name: 'The Crimson Crypt', start: 211, monster: 13, exit: 1, keys: [198, 168, 84, 43], walls: makeMaze([1, 13, 2, 12, 3, 11]), speed: 3, color: 0xd44537 },
 ]
 
 export const createGame = (level = 0, steps = 0): GameState => ({
