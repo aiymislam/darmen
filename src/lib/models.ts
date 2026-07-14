@@ -5,7 +5,7 @@ const mesh = (geometry: THREE.BufferGeometry, color: number) =>
 
 export function createSurvivor(color: number) {
   const group = new THREE.Group()
-  const skin = 0xf2d2bc
+  const skin = 0xffeee5
   const body = mesh(new THREE.CapsuleGeometry(0.24, 0.46, 6, 12), color)
   body.position.y = 0.72
   const head = mesh(new THREE.SphereGeometry(0.22, 18, 14), skin)
@@ -45,20 +45,32 @@ export function createSurvivor(color: number) {
 
 export function createMonster() {
   const group = new THREE.Group()
-  const body = mesh(new THREE.ConeGeometry(0.5, 1.25, 7), 0x351010)
-  body.position.y = 0.63
-  const head = mesh(new THREE.SphereGeometry(0.36, 10, 8), 0x591716)
-  head.position.y = 1.3
-  const hornMaterial = new THREE.MeshStandardMaterial({ color: 0x17110f, roughness: 1 })
-  const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0xff2b18 })
+  const shell = new THREE.MeshStandardMaterial({ color: 0x161316, roughness: 0.72 })
+  const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0xff3025 })
+  const abdomen = new THREE.Mesh(new THREE.SphereGeometry(0.48, 16, 12), shell)
+  abdomen.scale.set(1, 0.72, 1.25)
+  abdomen.position.set(0, 0.48, -0.18)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 10), shell)
+  head.position.set(0, 0.45, 0.42)
+  group.add(abdomen, head)
   for (const side of [-1, 1]) {
-    const horn = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.48, 6), hornMaterial)
-    horn.position.set(side * 0.25, 1.67, 0)
-    horn.rotation.z = side * -0.35
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), eyeMaterial)
-    eye.position.set(side * 0.13, 1.36, 0.31)
-    group.add(horn, eye)
+    for (let index = 0; index < 4; index += 1) {
+      const leg = new THREE.Group()
+      const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.65, 7), shell)
+      const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.72, 7), shell)
+      upper.rotation.z = side * (0.9 + index * 0.08)
+      upper.position.x = side * 0.28
+      lower.rotation.z = side * (0.55 + index * 0.06)
+      lower.position.set(side * 0.67, -0.16, 0)
+      leg.position.set(0, 0.5, 0.35 - index * 0.24)
+      leg.add(upper, lower)
+      group.add(leg)
+    }
+    for (const offset of [0.08, 0.18]) {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), eyeMaterial)
+      eye.position.set(side * offset, 0.52, 0.68)
+      group.add(eye)
+    }
   }
-  group.add(body, head)
   return group
 }
