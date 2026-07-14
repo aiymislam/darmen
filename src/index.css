@@ -27,6 +27,8 @@ h1, h2 { font-family: Cinzel, serif; }
 .game-screen.danger { background: radial-gradient(circle, #32141255, transparent 68%); }
 header, .status-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 header h1 { margin: 0; color: #e7e1d4; font-size: clamp(27px, 6vw, 42px); }
+.game-title h1 { font-size: clamp(24px, 5vw, 38px); }
+.level-name { margin: 5px 0 0; color: #d2735f; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .text-button { padding: 9px 12px; color: #8d9691; background: transparent; border: 1px solid #303a35; border-radius: 3px; }
 .status-bar { margin: 20px 0 12px; padding: 12px 15px; color: #bac5bf; background: #27352e; border: 1px solid #536159; font-size: 13px; }
 .status-bar strong, .survivor { color: #c9cdc8; }

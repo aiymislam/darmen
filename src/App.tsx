@@ -48,7 +48,10 @@ export default function App() {
   return (
     <main className={danger ? 'game-screen danger' : 'game-screen'}>
       <header>
-        <div><p className="kicker">LEVEL {game.level + 1} OF {levels.length}</p><h1>{level.name}</h1></div>
+        <div className="game-title">
+          <h1>Secrets of the Labyrinth</h1>
+          <p className="level-name">Level {game.level + 1} of {levels.length} · {level.name}</p>
+        </div>
         <button className="text-button" onClick={() => { setCharacter(null); restart() }}>Change survivor</button>
       </header>
       <section className="status-bar">

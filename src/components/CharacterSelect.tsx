@@ -17,7 +17,7 @@ export function CharacterSelect({ onSelect }: Props) {
   return (
     <main className="start-screen">
       <p className="kicker">A NIGHTMARE AWAITS</p>
-      <h1>The Hollow Maze</h1>
+      <h1>Secrets of the Labyrinth</h1>
       <p className="intro">Survive three changing mazes. Find every cursed key. Do not let it find you.</p>
       <h2>Choose your survivor</h2>
       <div className="characters">
