@@ -20,7 +20,10 @@ export default function App() {
       const keys = level.keys.includes(player) && !current.keys.includes(player)
         ? [...current.keys, player]
         : current.keys
-      const monster = moveMonster(current.monster, player, steps, level)
+      const firstMonsterStep = moveMonster(current.monster, player, steps, level)
+      const monster = firstMonsterStep === player
+        ? firstMonsterStep
+        : moveMonster(firstMonsterStep, player, steps, level)
       const caught = monster === player
       const escaped = player === level.exit && keys.length === level.keys.length
       if (escaped && current.level < levels.length - 1) return createGame(current.level + 1, steps)
