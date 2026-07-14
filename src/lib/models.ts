@@ -76,20 +76,3 @@ export function createMonster() {
   }
   return group
 }
-
-export function createWeb() {
-  const group = new THREE.Group()
-  const material = new THREE.MeshBasicMaterial({ color: 0xd9e2df, transparent: true, opacity: 0.62 })
-  for (const radius of [0.12, 0.24, 0.36]) {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.009, 4, 20), material)
-    ring.rotation.x = -Math.PI / 2
-    group.add(ring)
-  }
-  for (let index = 0; index < 8; index += 1) {
-    const strand = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.76), material)
-    strand.rotation.y = (Math.PI / 4) * index
-    group.add(strand)
-  }
-  group.position.y = 0.035
-  return group
-}

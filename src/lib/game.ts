@@ -7,7 +7,6 @@ export type GameState = {
   player: number
   monster: number
   keys: number[]
-  webs: number[]
   steps: number
   status: GameStatus
 }
@@ -31,7 +30,6 @@ export const createGame = (level = 0, steps = 0): GameState => ({
   player: levels[level].start,
   monster: levels[level].monster,
   keys: [],
-  webs: [],
   steps,
   status: 'playing',
 })

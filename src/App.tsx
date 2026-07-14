@@ -21,15 +21,10 @@ export default function App() {
         ? [...current.keys, player]
         : current.keys
       const monster = moveMonster(current.monster, player, steps, level)
-      const webbed = current.webs.includes(player)
-      const finalMonster = webbed ? moveMonster(monster, player, level.speed, level) : monster
-      const webs = steps % 4 === 0 && !current.webs.includes(current.monster)
-        ? [...current.webs.slice(-7), current.monster]
-        : current.webs.filter((web) => web !== player)
-      const caught = finalMonster === player
+      const caught = monster === player
       const escaped = player === level.exit && keys.length === level.keys.length
       if (escaped && current.level < levels.length - 1) return createGame(current.level + 1, steps)
-      return { ...current, player, monster: finalMonster, keys, webs, steps, status: caught ? 'lost' : escaped ? 'won' : 'playing' }
+      return { ...current, player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'won' : 'playing' }
     })
   }, [])
 
