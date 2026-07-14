@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { CharacterSelect } from './components/CharacterSelect'
 import type { Character } from './components/CharacterSelect'
 import { ThreeMaze } from './components/ThreeMaze'
-import { createGame, EXIT, isNearMonster, KEY_CELLS, moveMonster, movePlayer } from './lib/game'
+import { createGame, isNearMonster, levels, moveMonster, movePlayer } from './lib/game'
 import type { Direction } from './lib/game'
 
 export default function App() {
@@ -12,16 +12,18 @@ export default function App() {
   const move = useCallback((direction: Direction) => {
     setGame((current) => {
       if (current.status !== 'playing') return current
-      const player = movePlayer(current.player, direction)
+      const level = levels[current.level]
+      const player = movePlayer(current.player, direction, level)
       if (player === current.player) return current
       const steps = current.steps + 1
-      const keys = KEY_CELLS.includes(player) && !current.keys.includes(player)
+      const keys = level.keys.includes(player) && !current.keys.includes(player)
         ? [...current.keys, player]
         : current.keys
-      const monster = moveMonster(current.monster, player, steps)
+      const monster = moveMonster(current.monster, player, steps, level)
       const caught = monster === player
-      const escaped = player === EXIT && keys.length === KEY_CELLS.length
-      return { player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'won' : 'playing' }
+      const escaped = player === level.exit && keys.length === level.keys.length
+      if (escaped && current.level < levels.length - 1) return createGame(current.level + 1, steps)
+      return { ...current, player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'won' : 'playing' }
     })
   }, [])
 
@@ -41,16 +43,17 @@ export default function App() {
   if (!character) return <CharacterSelect onSelect={setCharacter} />
   const restart = () => setGame(createGame())
   const danger = isNearMonster(game)
+  const level = levels[game.level]
 
   return (
     <main className={danger ? 'game-screen danger' : 'game-screen'}>
       <header>
-        <div><p className="kicker">THE HOLLOW MAZE</p><h1>Stay quiet.</h1></div>
+        <div><p className="kicker">LEVEL {game.level + 1} OF {levels.length}</p><h1>{level.name}</h1></div>
         <button className="text-button" onClick={() => { setCharacter(null); restart() }}>Change survivor</button>
       </header>
       <section className="status-bar">
         <span className="survivor">Survivor: {character.name}</span>
-        <span>Keys <strong>{game.keys.length}/{KEY_CELLS.length}</strong></span>
+        <span>Keys <strong>{game.keys.length}/{level.keys.length}</strong></span>
         <span className={danger ? 'threat active' : 'threat'}>{danger ? 'IT IS CLOSE' : 'QUIET'}</span>
       </section>
       <ThreeMaze game={game} color={character.color} />
