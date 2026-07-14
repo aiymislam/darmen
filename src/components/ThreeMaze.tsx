@@ -87,7 +87,7 @@ export function ThreeMaze({ game, color }: Props) {
       const monsterPos = positionFor(current.monster)
       const moving = survivor.position.distanceTo(new THREE.Vector3(playerPos.x, 0, playerPos.z)) > 0.06
       if (current.player !== lastPlayerCell) lastPlayerCell = current.player
-      survivor.position.lerp(new THREE.Vector3(playerPos.x, 0, playerPos.z), 0.18)
+      survivor.position.lerp(new THREE.Vector3(playerPos.x, 0, playerPos.z), 0.42)
       survivor.position.y = moving ? Math.abs(Math.sin(frame * 0.32)) * 0.06 : 0
       survivor.material.rotation = moving ? Math.sin(frame * 0.32) * 0.04 : 0
       monster.position.lerp(new THREE.Vector3(monsterPos.x, 0, monsterPos.z), 0.12)

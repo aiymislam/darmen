@@ -31,7 +31,7 @@ export function createSurvivor(color: number) {
     depthWrite: true,
   })
   const sprite = new THREE.Sprite(material)
-  sprite.scale.set(0.58, 1.48, 1)
+  sprite.scale.set(0.48, 1.4, 1)
   sprite.center.set(0.5, 0)
   return sprite
 }

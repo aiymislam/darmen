@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CharacterSelect } from './components/CharacterSelect'
 import type { Character } from './components/CharacterSelect'
 import { ThreeMaze } from './components/ThreeMaze'
@@ -9,8 +9,12 @@ export default function App() {
   const [character, setCharacter] = useState<Character | null>(null)
   const [game, setGame] = useState(createGame)
   const [showJumpscare, setShowJumpscare] = useState(false)
+  const lastMoveAt = useRef(0)
 
   const move = useCallback((direction: Direction) => {
+    const now = performance.now()
+    if (now - lastMoveAt.current < 150) return
+    lastMoveAt.current = now
     setGame((current) => {
       if (current.status !== 'playing') return current
       const level = levels[current.level]
