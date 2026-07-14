@@ -6,7 +6,8 @@ body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradie
 button { font: inherit; cursor: pointer; }
 h1, h2 { font-family: Cinzel, serif; }
 
-.start-screen, .game-screen { width: min(760px, 100%); min-height: 100vh; margin: auto; padding: 48px 20px; }
+.start-screen { width: min(900px, 100%); min-height: 100vh; margin: auto; padding: 48px 20px; }
+.game-screen { width: min(1120px, 100%); min-height: 100vh; margin: auto; padding: 36px 24px; }
 .start-screen { display: flex; flex-direction: column; justify-content: center; text-align: center; }
 .kicker { margin: 0 0 8px; color: #a84035; font-size: 11px; font-weight: 700; letter-spacing: .24em; }
 .start-screen h1 { margin: 0; color: #ebe5d6; font-size: clamp(42px, 10vw, 76px); line-height: 1; text-shadow: 0 4px 30px #000; }
@@ -39,7 +40,7 @@ header h1 { margin: 0; color: #e7e1d4; font-size: clamp(27px, 6vw, 42px); }
 .threat { color: #657069; font-weight: 700; letter-spacing: .12em; }
 .threat.active { color: #d34a3d; animation: pulse .75s infinite alternate; }
 
-.three-maze { width: min(680px, 100%); aspect-ratio: 1.2; margin: auto; overflow: hidden; background: #17211d; border: 2px solid #718078; box-shadow: 0 24px 70px #0008, 0 0 28px #9cb6a522; }
+.three-maze { width: min(1040px, 100%); height: clamp(560px, 72vh, 780px); margin: auto; overflow: hidden; background: #17211d; border: 2px solid #718078; box-shadow: 0 24px 70px #0008, 0 0 28px #9cb6a522; }
 .three-maze canvas { display: block; width: 100%; height: 100%; }
 
 .controls { position: relative; width: 166px; height: 116px; margin: 16px auto 8px; }
@@ -58,4 +59,4 @@ header h1 { margin: 0; color: #e7e1d4; font-size: clamp(27px, 6vw, 42px); }
 .result-card button { width: 100%; margin-top: 14px; padding: 13px; color: #eee7d9; background: #8c3b32; border: 0; border-radius: 3px; font-weight: 700; }
 
 @keyframes pulse { to { opacity: .35; } }
-@media (max-width: 520px) { .start-screen { padding-top: 30px; }.characters { grid-template-columns: 1fr; }.character-card { flex-direction: row; text-align: left; padding: 12px 16px; }.avatar-preview { width: 44px; height: 50px; }.character-card small { margin-left: auto; }.game-screen { padding: 16px 10px 32px; }.status-bar { font-size: 11px; }.three-maze { aspect-ratio: 1; }.text-button { font-size: 11px; } }
+@media (max-width: 520px) { .start-screen { padding-top: 30px; }.characters { grid-template-columns: 1fr; }.character-card { flex-direction: row; text-align: left; padding: 12px 16px; }.avatar-preview { width: 44px; height: 50px; }.character-card small { margin-left: auto; }.game-screen { padding: 16px 10px 32px; }.status-bar { font-size: 11px; }.three-maze { height: min(72vh, 620px); }.text-button { font-size: 11px; } }
