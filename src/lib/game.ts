@@ -11,18 +11,38 @@ export type GameState = {
   status: GameStatus
 }
 
-export const SIZE = 15
-const dividerColumns = [2, 4, 6, 8, 10, 12]
-const makeMaze = (gaps: number[]) => new Set(
-  dividerColumns.flatMap((column, index) =>
-    Array.from({ length: SIZE }, (_, row) => row === gaps[index] ? -1 : row * SIZE + column),
-  ).filter((cell) => cell >= 0),
-)
+export const SIZE = 21
+
+const makeMaze = (seed: number) => {
+  const walls = new Set(Array.from({ length: SIZE * SIZE }, (_, cell) => cell))
+  const visited = new Set<string>()
+  const stack: Array<[number, number]> = [[1, 1]]
+  let random = seed
+  const nextRandom = () => {
+    random = (random * 1664525 + 1013904223) >>> 0
+    return random
+  }
+  while (stack.length > 0) {
+    const [row, column] = stack[stack.length - 1]
+    visited.add(`${row},${column}`)
+    walls.delete(row * SIZE + column)
+    const choices = [[-2, 0], [2, 0], [0, -2], [0, 2]]
+      .map(([rowStep, columnStep]) => [row + rowStep, column + columnStep, rowStep, columnStep])
+      .filter(([nextRow, nextColumn]) => nextRow > 0 && nextRow < SIZE - 1 && nextColumn > 0 && nextColumn < SIZE - 1 && !visited.has(`${nextRow},${nextColumn}`))
+      .sort(() => (nextRandom() % 3) - 1)
+    const next = choices[0]
+    if (!next) { stack.pop(); continue }
+    const [nextRow, nextColumn, rowStep, columnStep] = next
+    walls.delete((row + rowStep / 2) * SIZE + column + columnStep / 2)
+    stack.push([nextRow, nextColumn])
+  }
+  return walls
+}
 
 export const levels: Level[] = [
-  { name: 'The Abandoned Ward', start: 211, monster: 1, exit: 13, keys: [198, 168, 112, 56], walls: makeMaze([2, 12, 3, 11, 4, 10]), speed: 1, color: 0xe98566 },
-  { name: 'The Flooded Cells', start: 223, monster: 13, exit: 1, keys: [206, 174, 142, 108, 78], walls: makeMaze([11, 3, 12, 4, 10, 2]), speed: 1, color: 0x56a7b8 },
-  { name: 'The Crimson Crypt', start: 211, monster: 13, exit: 1, keys: [198, 168, 129, 95, 84, 43], walls: makeMaze([1, 13, 2, 12, 3, 11]), speed: 1, color: 0xd44537 },
+  { name: 'The Abandoned Ward', start: 400, monster: 22, exit: 40, keys: [362, 288, 156, 80], walls: makeMaze(1847), speed: 1, color: 0xe98566 },
+  { name: 'The Flooded Cells', start: 418, monster: 40, exit: 22, keys: [372, 276, 206, 112, 78], walls: makeMaze(7391), speed: 1, color: 0x56a7b8 },
+  { name: 'The Crimson Crypt', start: 400, monster: 40, exit: 22, keys: [410, 318, 248, 152, 76, 198], walls: makeMaze(12553), speed: 1, color: 0xd44537 },
 ]
 
 export const createGame = (level = 0, steps = 0): GameState => ({
