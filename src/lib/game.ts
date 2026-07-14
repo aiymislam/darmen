@@ -20,9 +20,9 @@ const makeMaze = (gaps: number[]) => new Set(
 )
 
 export const levels: Level[] = [
-  { name: 'The Abandoned Ward', start: 211, monster: 1, exit: 13, keys: [168, 112, 56], walls: makeMaze([2, 12, 3, 11, 4, 10]), speed: 4, color: 0xe98566 },
-  { name: 'The Flooded Cells', start: 223, monster: 13, exit: 1, keys: [206, 142, 78], walls: makeMaze([11, 3, 12, 4, 10, 2]), speed: 3, color: 0x56a7b8 },
-  { name: 'The Crimson Crypt', start: 211, monster: 13, exit: 1, keys: [198, 168, 84, 43], walls: makeMaze([1, 13, 2, 12, 3, 11]), speed: 3, color: 0xd44537 },
+  { name: 'The Abandoned Ward', start: 211, monster: 1, exit: 13, keys: [198, 168, 112, 56], walls: makeMaze([2, 12, 3, 11, 4, 10]), speed: 1, color: 0xe98566 },
+  { name: 'The Flooded Cells', start: 223, monster: 13, exit: 1, keys: [206, 174, 142, 108, 78], walls: makeMaze([11, 3, 12, 4, 10, 2]), speed: 1, color: 0x56a7b8 },
+  { name: 'The Crimson Crypt', start: 211, monster: 13, exit: 1, keys: [198, 168, 129, 95, 84, 43], walls: makeMaze([1, 13, 2, 12, 3, 11]), speed: 1, color: 0xd44537 },
 ]
 
 export const createGame = (level = 0, steps = 0): GameState => ({

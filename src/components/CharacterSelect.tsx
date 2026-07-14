@@ -32,7 +32,7 @@ export function CharacterSelect({ onSelect }: Props) {
           </button>
         ))}
       </div>
-      <p className="warning">Medium difficulty · Each level becomes more dangerous</p>
+      <p className="warning">Hard difficulty · The spider moves every time you move</p>
     </main>
   )
 }
