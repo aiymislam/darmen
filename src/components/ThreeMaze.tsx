@@ -79,6 +79,7 @@ export function ThreeMaze({ game, color }: Props) {
 
     let frame = 0
     let animation = 0
+    let lastPlayerCell = state.current.player
     const resize = () => {
       const width = host.current?.clientWidth ?? 600
       const height = host.current?.clientHeight ?? 600
@@ -90,7 +91,19 @@ export function ThreeMaze({ game, color }: Props) {
       const current = state.current
       const playerPos = positionFor(current.player)
       const monsterPos = positionFor(current.monster)
+      const moving = survivor.position.distanceTo(new THREE.Vector3(playerPos.x, 0, playerPos.z)) > 0.06
+      if (current.player !== lastPlayerCell) {
+        const previous = positionFor(lastPlayerCell)
+        survivor.rotation.y = Math.atan2(playerPos.x - previous.x, playerPos.z - previous.z)
+        lastPlayerCell = current.player
+      }
       survivor.position.lerp(new THREE.Vector3(playerPos.x, 0, playerPos.z), 0.18)
+      const stride = moving ? Math.sin(frame * 0.32) * 0.62 : 0
+      survivor.position.y = moving ? Math.abs(Math.sin(frame * 0.32)) * 0.045 : 0
+      survivor.getObjectByName('arm-left')!.rotation.x = stride
+      survivor.getObjectByName('arm-right')!.rotation.x = -stride
+      survivor.getObjectByName('leg-left')!.rotation.x = -stride
+      survivor.getObjectByName('leg-right')!.rotation.x = stride
       monster.position.lerp(new THREE.Vector3(monsterPos.x, 0, monsterPos.z), 0.12)
       camera.position.lerp(new THREE.Vector3(playerPos.x, 4.8, playerPos.z + 4.5), 0.08)
       camera.lookAt(playerPos.x, 0.45, playerPos.z)

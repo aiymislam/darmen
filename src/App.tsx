@@ -8,6 +8,7 @@ import type { Direction } from './lib/game'
 export default function App() {
   const [character, setCharacter] = useState<Character | null>(null)
   const [game, setGame] = useState(createGame)
+  const [showJumpscare, setShowJumpscare] = useState(false)
 
   const move = useCallback((direction: Direction) => {
     setGame((current) => {
@@ -45,8 +46,15 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [move])
 
+  useEffect(() => {
+    if (game.status !== 'lost') return
+    setShowJumpscare(true)
+    const timer = window.setTimeout(() => setShowJumpscare(false), 1250)
+    return () => window.clearTimeout(timer)
+  }, [game.status])
+
   if (!character) return <CharacterSelect onSelect={setCharacter} />
-  const restart = () => setGame(createGame())
+  const restart = () => { setShowJumpscare(false); setGame(createGame()) }
   const danger = isNearMonster(game)
   const level = levels[game.level]
 
@@ -71,7 +79,13 @@ export default function App() {
         ))}
       </nav>
       <p className="instructions">Use WASD, arrow keys, or controls. Gather every key, then reach the door.</p>
-      {game.status !== 'playing' && (
+      {showJumpscare && (
+        <div className="jumpscare" aria-label="Spider jumpscare">
+          <div className="scare-spider"><i className="scare-eye one" /><i className="scare-eye two" /><i className="scare-eye three" /><i className="scare-eye four" /><i className="fang left" /><i className="fang right" /></div>
+          <strong>CAUGHT</strong>
+        </div>
+      )}
+      {game.status !== 'playing' && !showJumpscare && (
         <div className="overlay"><section className="result-card">
           <span className={game.status === 'won' ? 'result-mark escaped' : 'result-mark caught'} />
           <p className="kicker">{game.status === 'won' ? 'YOU SURVIVED' : 'YOU WERE FOUND'}</p>

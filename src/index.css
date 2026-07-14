@@ -57,6 +57,15 @@ header h1 { margin: 0; color: #e7e1d4; font-size: clamp(27px, 6vw, 42px); }
 .result-card h2 { margin: 8px 0 14px; color: #ded8ca; font-size: 26px; }
 .result-card p:not(.kicker) { color: #737c77; }
 .result-card button { width: 100%; margin-top: 14px; padding: 13px; color: #eee7d9; background: #8c3b32; border: 0; border-radius: 3px; font-weight: 700; }
+.jumpscare { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; overflow: hidden; background: #050000; animation: scare-flash .16s steps(2) infinite; }
+.jumpscare strong { position: absolute; bottom: 8%; color: #ff2418; font-family: Cinzel, serif; font-size: clamp(38px, 9vw, 92px); letter-spacing: .18em; text-shadow: 0 0 20px #f00; }
+.scare-spider { position: relative; width: min(76vw, 620px); aspect-ratio: 1.25; background: radial-gradient(ellipse at 50% 55%, #3b1110 0 20%, #110606 52%, #000 70%); border-radius: 48%; filter: drop-shadow(0 0 50px #b00); animation: spider-lunge 1.25s cubic-bezier(.2,.9,.2,1) forwards; }
+.scare-eye { position: absolute; top: 34%; width: 9%; aspect-ratio: 1; background: radial-gradient(circle, #fff 0 9%, #ff1d12 14% 48%, #430000 58%); border-radius: 50%; box-shadow: 0 0 25px #f00; }
+.scare-eye.one { left: 27%; }.scare-eye.two { left: 39%; }.scare-eye.three { right: 39%; }.scare-eye.four { right: 27%; }
+.fang { position: absolute; top: 54%; width: 10%; height: 26%; background: linear-gradient(90deg, #e8ddd1, #796c65); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.fang.left { left: 34%; transform: rotate(10deg); }.fang.right { right: 34%; transform: rotate(-10deg); }
 
 @keyframes pulse { to { opacity: .35; } }
+@keyframes spider-lunge { from { transform: scale(.08) rotate(-8deg); } 65% { transform: scale(1.35) rotate(4deg); } to { transform: scale(1.08); } }
+@keyframes scare-flash { to { background: #2c0000; } }
 @media (max-width: 520px) { .start-screen { padding-top: 30px; }.characters { grid-template-columns: 1fr; }.character-card { flex-direction: row; text-align: left; padding: 12px 16px; }.avatar-preview { width: 44px; height: 50px; }.character-card small { margin-left: auto; }.game-screen { padding: 16px 10px 32px; }.status-bar { font-size: 11px; }.three-maze { height: min(72vh, 620px); }.text-button { font-size: 11px; } }

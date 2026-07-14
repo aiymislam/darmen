@@ -24,9 +24,11 @@ export function createSurvivor(color: number) {
     const ear = mesh(new THREE.SphereGeometry(0.04, 8, 6), skin)
     ear.position.set(side * 0.205, 1.28, 0)
     const arm = mesh(new THREE.CapsuleGeometry(0.055, 0.38, 4, 8), skin)
+    arm.name = side < 0 ? 'arm-left' : 'arm-right'
     arm.position.set(side * 0.3, 0.76, 0)
     arm.rotation.z = side * -0.08
     const leg = mesh(new THREE.CapsuleGeometry(0.075, 0.34, 4, 8), 0x1c2327)
+    leg.name = side < 0 ? 'leg-left' : 'leg-right'
     leg.position.set(side * 0.12, 0.25, 0)
     group.add(eye, pupil, ear, arm, leg)
   }
