@@ -1,8 +1,5 @@
 import * as THREE from 'three'
 
-const mesh = (geometry: THREE.BufferGeometry, color: number) =>
-  new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, roughness: 0.72 }))
-
 export function createSurvivor(color: number) {
   const canvas = document.createElement('canvas')
   canvas.width = 256
