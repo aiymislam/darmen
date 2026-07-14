@@ -4,53 +4,38 @@ const mesh = (geometry: THREE.BufferGeometry, color: number) =>
   new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, roughness: 0.72 }))
 
 export function createSurvivor(color: number) {
-  const group = new THREE.Group()
-  const skin = 0xffeee5
-  const body = mesh(new THREE.CylinderGeometry(0.25, 0.17, 0.58, 12), color)
-  body.position.y = 0.76
-  const neck = mesh(new THREE.CylinderGeometry(0.07, 0.075, 0.13, 10), skin)
-  neck.position.y = 1.09
-  const head = mesh(new THREE.SphereGeometry(0.19, 20, 16), skin)
-  head.scale.set(0.86, 1.12, 0.9)
-  head.position.y = 1.28
-  const hair = mesh(new THREE.SphereGeometry(0.195, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), 0x1b1512)
-  hair.position.y = 1.36
-  const white = new THREE.MeshStandardMaterial({ color: 0xf3eee6, roughness: 0.45 })
-  const dark = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.45 })
-  for (const side of [-1, 1]) {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.032, 10, 8), white)
-    eye.scale.set(1.15, 0.64, 0.4)
-    eye.position.set(side * 0.068, 1.31, 0.166)
-    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 6), dark)
-    pupil.position.set(side * 0.068, 1.31, 0.188)
-    const ear = mesh(new THREE.SphereGeometry(0.032, 8, 6), skin)
-    ear.position.set(side * 0.176, 1.28, 0)
-    const arm = mesh(new THREE.CapsuleGeometry(0.052, 0.34, 4, 8), color)
-    arm.name = side < 0 ? 'arm-left' : 'arm-right'
-    arm.position.set(side * 0.29, 0.77, 0)
-    arm.rotation.z = side * -0.08
-    const hand = mesh(new THREE.SphereGeometry(0.06, 10, 8), skin)
-    hand.position.set(0, -0.27, 0)
-    arm.add(hand)
-    const leg = mesh(new THREE.CapsuleGeometry(0.068, 0.38, 4, 8), 0x1c2327)
-    leg.name = side < 0 ? 'leg-left' : 'leg-right'
-    leg.position.set(side * 0.105, 0.25, 0)
-    const shoe = mesh(new THREE.BoxGeometry(0.14, 0.09, 0.24), 0x111315)
-    shoe.position.set(0, -0.28, 0.055)
-    leg.add(shoe)
-    group.add(eye, pupil, ear, arm, leg)
-  }
-  const nose = mesh(new THREE.ConeGeometry(0.035, 0.105, 8), skin)
-  nose.position.set(0, 1.245, 0.235)
-  nose.rotation.x = Math.PI / 2
-  const smileCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.065, 1.18, 0.213),
-    new THREE.Vector3(0, 1.15, 0.227),
-    new THREE.Vector3(0.065, 1.18, 0.213),
-  ])
-  const smile = new THREE.Mesh(new THREE.TubeGeometry(smileCurve, 10, 0.009, 6, false), dark)
-  group.add(body, neck, head, hair, nose, smile)
-  return group
+  const canvas = document.createElement('canvas')
+  canvas.width = 256
+  canvas.height = 512
+  const context = canvas.getContext('2d')!
+  const coat = `#${color.toString(16).padStart(6, '0')}`
+  context.fillStyle = '#1d2327'
+  context.fillRect(78, 345, 42, 115)
+  context.fillRect(136, 345, 42, 115)
+  context.fillStyle = '#111315'
+  context.fillRect(66, 443, 58, 26)
+  context.fillRect(132, 443, 58, 26)
+  context.fillStyle = coat
+  context.beginPath()
+  context.moveTo(63, 195); context.lineTo(193, 195); context.lineTo(180, 355); context.lineTo(76, 355); context.closePath(); context.fill()
+  context.lineWidth = 25
+  context.strokeStyle = coat
+  context.beginPath(); context.moveTo(76, 215); context.lineTo(43, 345); context.moveTo(180, 215); context.lineTo(213, 345); context.stroke()
+  context.fillStyle = '#ffeee5'
+  context.beginPath(); context.arc(43, 354, 17, 0, Math.PI * 2); context.arc(213, 354, 17, 0, Math.PI * 2); context.fill()
+  context.beginPath(); context.ellipse(128, 125, 67, 79, 0, 0, Math.PI * 2); context.fill()
+  context.fillStyle = '#201714'
+  context.beginPath(); context.arc(128, 98, 70, Math.PI, Math.PI * 2); context.lineTo(192, 123); context.lineTo(64, 123); context.closePath(); context.fill()
+  context.fillStyle = '#080808'
+  context.beginPath(); context.arc(102, 132, 7, 0, Math.PI * 2); context.arc(154, 132, 7, 0, Math.PI * 2); context.fill()
+  context.strokeStyle = '#80564d'; context.lineWidth = 4
+  context.beginPath(); context.moveTo(128, 140); context.lineTo(122, 157); context.lineTo(132, 157); context.stroke()
+  context.beginPath(); context.arc(128, 161, 19, 0.2, Math.PI - 0.2); context.stroke()
+  const material = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true })
+  const sprite = new THREE.Sprite(material)
+  sprite.scale.set(0.78, 1.56, 1)
+  sprite.center.set(0.5, 0)
+  return sprite
 }
 
 export function createMonster() {
