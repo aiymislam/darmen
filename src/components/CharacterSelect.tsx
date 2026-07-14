@@ -45,7 +45,7 @@ export function CharacterSelect({ onSelect }: Props) {
         {characters.map((character) => (
           <button className="character-card" key={character.name} onClick={() => onSelect(character)}>
             <span className="avatar-preview" style={{ '--coat': character.colorHex } as CSSProperties}>
-              <i className="avatar-head"><b className="preview-eye left" /><b className="preview-eye right" /><b className="preview-nose" /><b className="preview-smile" /></i>
+              <i className="avatar-head" />
               <i className="avatar-body" />
             </span>
             <strong>{character.name}</strong>
