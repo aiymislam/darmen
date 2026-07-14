@@ -17,11 +17,12 @@ h1, h2 { font-family: Cinzel, serif; }
 .character-card:hover { border-color: #d2735f; background: #34453c; transform: translateY(-4px); box-shadow: 0 14px 30px #0006; }
 .avatar-preview { position: relative; width: 54px; height: 64px; perspective: 120px; filter: drop-shadow(8px 9px 8px #000); }
 .avatar-head, .avatar-body { position: absolute; left: 50%; display: block; transform: translateX(-50%) rotateY(-16deg); }
-.avatar-head { top: 1px; width: 25px; height: 28px; background: linear-gradient(135deg, #e0ad86, #8e5f45); border-radius: 48% 48% 42% 42%; box-shadow: inset 4px 5px #261d19; }
+.avatar-head { top: 1px; width: 25px; height: 28px; background: linear-gradient(135deg, #fff1e7, #d9ae98); border-radius: 48% 48% 42% 42%; box-shadow: inset 4px 5px #261d19; }
 .avatar-body { bottom: 0; width: 42px; height: 40px; background: linear-gradient(120deg, var(--coat), #151716); clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); }
-.preview-eye { position: absolute; top: 12px; width: 4px; height: 3px; background: #f4eee5; border-radius: 50%; box-shadow: inset 1.5px 0 #211713; }
+.preview-eye { position: absolute; top: 12px; width: 4px; height: 4px; background: #050505; border-radius: 50%; }
 .preview-eye.left { left: 7px; }.preview-eye.right { right: 5px; }
 .preview-nose { position: absolute; top: 16px; left: 13px; width: 3px; height: 5px; background: #9b674d; border-radius: 50%; }
+.preview-smile { position: absolute; top: 20px; left: 9px; width: 9px; height: 5px; border-bottom: 2px solid #111; border-radius: 50%; }
 .character-card strong { font-family: Cinzel, serif; font-size: 17px; }
 .character-card small { color: #737b77; }
 .warning { margin: 28px 0 0; color: #555d59; font-size: 12px; }

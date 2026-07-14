@@ -5,7 +5,7 @@ const mesh = (geometry: THREE.BufferGeometry, color: number) =>
 
 export function createSurvivor(color: number) {
   const group = new THREE.Group()
-  const skin = 0xc99470
+  const skin = 0xf2d2bc
   const body = mesh(new THREE.CapsuleGeometry(0.24, 0.46, 6, 12), color)
   body.position.y = 0.72
   const head = mesh(new THREE.SphereGeometry(0.22, 18, 14), skin)
@@ -14,12 +14,12 @@ export function createSurvivor(color: number) {
   const hair = mesh(new THREE.SphereGeometry(0.225, 16, 9, 0, Math.PI * 2, 0, Math.PI / 2), 0x1b1512)
   hair.position.y = 1.36
   const white = new THREE.MeshStandardMaterial({ color: 0xf3eee6, roughness: 0.45 })
-  const dark = new THREE.MeshStandardMaterial({ color: 0x201713, roughness: 0.55 })
+  const dark = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.45 })
   for (const side of [-1, 1]) {
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), white)
     eye.scale.set(1, 0.72, 0.48)
     eye.position.set(side * 0.082, 1.31, 0.187)
-    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.018, 8, 6), dark)
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 6), dark)
     pupil.position.set(side * 0.082, 1.31, 0.221)
     const ear = mesh(new THREE.SphereGeometry(0.04, 8, 6), skin)
     ear.position.set(side * 0.205, 1.28, 0)
@@ -33,9 +33,13 @@ export function createSurvivor(color: number) {
   const nose = mesh(new THREE.ConeGeometry(0.035, 0.105, 8), skin)
   nose.position.set(0, 1.245, 0.235)
   nose.rotation.x = Math.PI / 2
-  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.014, 0.012), new THREE.MeshStandardMaterial({ color: 0x733c38 }))
-  mouth.position.set(0, 1.17, 0.218)
-  group.add(body, head, hair, nose, mouth)
+  const smileCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-0.065, 1.18, 0.213),
+    new THREE.Vector3(0, 1.15, 0.227),
+    new THREE.Vector3(0.065, 1.18, 0.213),
+  ])
+  const smile = new THREE.Mesh(new THREE.TubeGeometry(smileCurve, 10, 0.009, 6, false), dark)
+  group.add(body, head, hair, nose, smile)
   return group
 }
 
