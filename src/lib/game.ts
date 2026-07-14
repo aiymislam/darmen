@@ -7,6 +7,7 @@ export type GameState = {
   player: number
   monster: number
   keys: number[]
+  webs: number[]
   steps: number
   status: GameStatus
 }
@@ -29,6 +30,7 @@ export const createGame = (level = 0, steps = 0): GameState => ({
   player: levels[level].start,
   monster: levels[level].monster,
   keys: [],
+  webs: [],
   steps,
   status: 'playing',
 })
@@ -49,11 +51,21 @@ const distance = (from: number, to: number) =>
 
 export const moveMonster = (monster: number, player: number, steps: number, level: Level) => {
   if (steps % level.speed !== 0) return monster
-  const options = [-SIZE, SIZE, -1, 1]
-    .map((change) => monster + change)
-    .filter((cell) => canEnter(monster, cell, level))
-    .sort((a, b) => distance(a, player) - distance(b, player))
-  return options[0] ?? monster
+  const queue: Array<{ cell: number; first: number }> = [{ cell: monster, first: monster }]
+  const visited = new Set([monster])
+  while (queue.length > 0) {
+    const current = queue.shift()
+    if (!current) break
+    if (current.cell === player) return current.first
+    for (const change of [-SIZE, SIZE, -1, 1]) {
+      const next = current.cell + change
+      if (!visited.has(next) && canEnter(current.cell, next, level)) {
+        visited.add(next)
+        queue.push({ cell: next, first: current.cell === monster ? next : current.first })
+      }
+    }
+  }
+  return monster
 }
 
 export const isNearMonster = (state: GameState) => distance(state.player, state.monster) <= 3

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GameState } from '../lib/game'
 import { levels, SIZE } from '../lib/game'
-import { createMonster, createSurvivor } from '../lib/models'
+import { createMonster, createSurvivor, createWeb } from '../lib/models'
 
 type Props = { game: GameState; color: number }
 const positionFor = (cell: number) => ({ x: (cell % SIZE) - SIZE / 2 + 0.5, z: Math.floor(cell / SIZE) - SIZE / 2 + 0.5 })
@@ -52,6 +52,12 @@ export function ThreeMaze({ game, color }: Props) {
     const survivor = createSurvivor(color)
     const monster = createMonster()
     scene.add(survivor, monster)
+    const webMeshes = Array.from({ length: 8 }, () => {
+      const web = createWeb()
+      web.visible = false
+      scene.add(web)
+      return web
+    })
     const keyMeshes = level.keys.map((cell) => {
       const key = new THREE.Mesh(
         new THREE.TorusGeometry(0.18, 0.055, 8, 16),
@@ -90,6 +96,14 @@ export function ThreeMaze({ game, color }: Props) {
       camera.lookAt(playerPos.x, 0.45, playerPos.z)
       lamp.position.lerp(new THREE.Vector3(playerPos.x, 4, playerPos.z + 1.5), 0.1)
       monster.rotation.y = Math.sin(frame * 0.08) * 0.12
+      webMeshes.forEach((web, index) => {
+        const cell = current.webs[index]
+        web.visible = cell !== undefined
+        if (cell !== undefined) {
+          const webPos = positionFor(cell)
+          web.position.set(webPos.x, 0.035, webPos.z)
+        }
+      })
       keyMeshes.forEach(({ cell, key }) => { key.visible = !current.keys.includes(cell); key.rotation.z += 0.025 })
       door.material.emissive.setHex(current.keys.length === level.keys.length ? 0x8c3a16 : 0x210504)
       frame += 1
