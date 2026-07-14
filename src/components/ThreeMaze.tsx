@@ -38,12 +38,12 @@ export function ThreeMaze({ game, color }: Props) {
     floor.receiveShadow = true
     scene.add(floor)
 
-    const wallGeometry = new THREE.BoxGeometry(0.92, 1.35, 0.92)
+    const wallGeometry = new THREE.BoxGeometry(0.94, 2.05, 0.94)
     const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x66756c, roughness: 0.9 })
     level.walls.forEach((cell) => {
       const wall = new THREE.Mesh(wallGeometry, wallMaterial)
       const pos = positionFor(cell)
-      wall.position.set(pos.x, 0.675, pos.z)
+      wall.position.set(pos.x, 1.025, pos.z)
       wall.castShadow = true
       wall.receiveShadow = true
       scene.add(wall)

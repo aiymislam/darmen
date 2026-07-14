@@ -23,9 +23,15 @@ export function createSurvivor(color: number) {
   context.beginPath(); context.ellipse(128, 125, 67, 79, 0, 0, Math.PI * 2); context.fill()
   context.fillStyle = '#201714'
   context.beginPath(); context.arc(128, 98, 70, Math.PI, Math.PI * 2); context.lineTo(192, 123); context.lineTo(64, 123); context.closePath(); context.fill()
-  const material = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true })
+  const material = new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(canvas),
+    transparent: true,
+    alphaTest: 0.08,
+    depthTest: true,
+    depthWrite: true,
+  })
   const sprite = new THREE.Sprite(material)
-  sprite.scale.set(0.78, 1.56, 1)
+  sprite.scale.set(0.58, 1.48, 1)
   sprite.center.set(0.5, 0)
   return sprite
 }
