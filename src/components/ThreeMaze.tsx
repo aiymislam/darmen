@@ -12,16 +12,16 @@ function createBloodyWallTexture() {
   canvas.width = 256
   canvas.height = 256
   const context = canvas.getContext('2d')!
-  context.fillStyle = '#514744'
+  context.fillStyle = '#717572'
   context.fillRect(0, 0, 256, 256)
-  context.strokeStyle = '#2c2726'
+  context.strokeStyle = '#484c49'
   context.lineWidth = 5
   for (let row = 32; row < 256; row += 48) {
     context.beginPath(); context.moveTo(0, row); context.lineTo(256, row); context.stroke()
   }
   context.fillStyle = '#6d0808'
-  context.globalAlpha = 0.48
-  const stains = [[30, 0, 24, 118], [105, 0, 18, 152], [178, 0, 28, 96], [230, 0, 12, 132]]
+  context.globalAlpha = 0.28
+  const stains = [[34, 0, 16, 82], [112, 0, 12, 105], [184, 0, 18, 70], [234, 0, 8, 88]]
   stains.forEach(([x, y, width, height], index) => {
     context.beginPath()
     context.ellipse(x + width / 2, y + 18, width, 30, 0, 0, Math.PI * 2)
@@ -31,8 +31,8 @@ function createBloodyWallTexture() {
     if (index % 2 === 0) context.fillRect(x + width, 20, 9, height * 0.55)
   })
   context.fillStyle = '#a20c0c'
-  context.globalAlpha = 0.34
-  context.beginPath(); context.ellipse(135, 76, 48, 22, -0.2, 0, Math.PI * 2); context.fill()
+  context.globalAlpha = 0.2
+  context.beginPath(); context.ellipse(135, 76, 34, 15, -0.2, 0, Math.PI * 2); context.fill()
   context.globalAlpha = 1
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
@@ -73,7 +73,7 @@ export function ThreeMaze({ game, color }: Props) {
     const wallGeometry = new THREE.BoxGeometry(0.9, 1.7, 0.9)
     const wallMaterial = new THREE.MeshStandardMaterial({
       map: createBloodyWallTexture(),
-      color: 0xb9a6a0,
+      color: 0xd1d5d2,
       roughness: 0.94,
       metalness: 0.02,
     })
