@@ -71,3 +71,17 @@ export function createMonster() {
   }
   return group
 }
+
+export function createGoldGun() {
+  const group = new THREE.Group()
+  const gold = new THREE.MeshStandardMaterial({ color: 0xffc928, metalness: 0.82, roughness: 0.22 })
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.42), gold)
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.28, 10), gold)
+  barrel.rotation.x = Math.PI / 2
+  barrel.position.z = 0.3
+  const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.1), gold)
+  grip.position.set(0, -0.13, 0.03)
+  grip.rotation.x = -0.25
+  group.add(body, barrel, grip)
+  return group
+}

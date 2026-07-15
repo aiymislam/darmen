@@ -20,11 +20,22 @@ export default function App() {
   const [game, setGame] = useState(createGame)
   const [showJumpscare, setShowJumpscare] = useState(false)
   const [jumpSignal, setJumpSignal] = useState(0)
+  const [shotSignal, setShotSignal] = useState(0)
+  const [spiderDead, setSpiderDead] = useState(false)
+  const [gunCooldown, setGunCooldown] = useState(0)
   const [user, setUser] = useState<User | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const lastMoveAt = useRef(0)
   const playerId = useRef(crypto.randomUUID())
   const raceChannel = useRef<RealtimeChannel | null>(null)
+
+  const shoot = useCallback(() => {
+    if (gunCooldown > 0) return
+    setShotSignal((signal) => signal + 1)
+    setSpiderDead(true)
+    setGunCooldown(60)
+    window.setTimeout(() => setSpiderDead(false), 5000)
+  }, [gunCooldown])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => { setUser(data.user); setCheckingAuth(false) })
@@ -46,14 +57,14 @@ export default function App() {
       const keys = level.keys.includes(player) && !current.keys.includes(player)
         ? [...current.keys, player]
         : current.keys
-      const firstMonsterStep = moveMonster(current.monster, player, steps, level)
+      const firstMonsterStep = spiderDead ? current.monster : moveMonster(current.monster, player, steps, level)
       const monster = firstMonsterStep
-      const caught = monster === player
+      const caught = !spiderDead && monster === player
       const escaped = player === level.exit && keys.length === level.keys.length
       if (escaped && playMode === 'single' && current.level < levels.length - 1) return createGame(current.level + 1, steps)
       return { ...current, player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'won' : 'playing' }
     })
-  }, [playMode, opponent])
+  }, [playMode, opponent, spiderDead])
 
   useEffect(() => {
     const directions: Record<string, Direction> = {
@@ -62,12 +73,19 @@ export default function App() {
     }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
+      if (event.key.toLowerCase() === 'l') { event.preventDefault(); shoot(); return }
       const direction = directions[event.key]
       if (direction) { event.preventDefault(); move(direction) }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [move])
+  }, [move, shoot])
+
+  useEffect(() => {
+    if (gunCooldown <= 0) return
+    const timer = window.setTimeout(() => setGunCooldown((seconds) => Math.max(0, seconds - 1)), 1000)
+    return () => window.clearTimeout(timer)
+  }, [gunCooldown])
 
   useEffect(() => {
     if (game.status !== 'lost') return
@@ -123,8 +141,9 @@ export default function App() {
         <span className={danger ? 'threat active' : 'threat'}>{danger ? 'IT IS CLOSE' : 'QUIET'}</span>
       </section>
       {playMode === 'multi' && <section className="race-status"><strong>Room: {roomCode}</strong><span>{opponent ? `${opponent.name}: ${opponent.status === 'won' ? 'escaped!' : 'racing'}` : 'Waiting for opponent…'}</span></section>}
-      <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} />
+      <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} shotSignal={shotSignal} spiderDead={spiderDead} />
       <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP · D</button>
+      <button className="weapon-button" onClick={shoot} disabled={gunCooldown > 0}>{gunCooldown > 0 ? `GUN COOLDOWN · ${gunCooldown}s` : 'FIRE GOLD GUN · L'}</button>
       <nav className="controls" aria-label="Movement controls">
         {([['▲', 'up'], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']] as const).map(([label, direction]) => (
           <button className={direction} key={direction} onClick={() => move(direction)} aria-label={`Move ${direction}`}>{label}</button>

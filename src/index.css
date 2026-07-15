@@ -74,6 +74,8 @@ header h1 { margin: 0; color: #e7e1d4; font-size: clamp(27px, 6vw, 42px); }
 .controls button:active { background: #82372f; }
 .controls .up { top: 0; left: 58px; }.controls .left { top: 56px; left: 2px; }.controls .down { top: 56px; left: 58px; }.controls .right { top: 56px; left: 114px; }
 .jump-button { display: block; width: 166px; margin: 16px auto -8px; padding: 12px; color: white; background: #315b68; border: 1px solid #6fa1b0; border-radius: 3px; font-weight: 900; letter-spacing: .12em; box-shadow: 0 7px 18px #0006; }
+.weapon-button { display: block; width: 220px; margin: 16px auto -6px; padding: 12px; color: #211703; background: #e8b923; border: 1px solid #ffe072; border-radius: 3px; font-weight: 900; letter-spacing: .08em; box-shadow: 0 0 20px #dcae3555; }
+.weapon-button:disabled { color: #8c8370; background: #37352e; border-color: #5f5a4c; box-shadow: none; cursor: wait; }
 .instructions { margin: 0; color: #5d6761; text-align: center; font-size: 12px; }
 
 .overlay { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: #030504dd; backdrop-filter: blur(7px); }

@@ -2,17 +2,19 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GameState } from '../lib/game'
 import { levels } from '../lib/game'
-import { createMonster, createSurvivor } from '../lib/models'
+import { createGoldGun, createMonster, createSurvivor } from '../lib/models'
 
-type Props = { game: GameState; color: number; jumpSignal: number }
+type Props = { game: GameState; color: number; jumpSignal: number; shotSignal: number; spiderDead: boolean }
 const positionFor = (cell: number, size: number) => ({ x: (cell % size) - size / 2 + 0.5, z: Math.floor(cell / size) - size / 2 + 0.5 })
 
-export function ThreeMaze({ game, color, jumpSignal }: Props) {
+export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const state = useRef(game)
   const jump = useRef(jumpSignal)
+  const combat = useRef({ shotSignal, spiderDead })
   state.current = game
   jump.current = jumpSignal
+  combat.current = { shotSignal, spiderDead }
   const level = levels[game.level]
 
   useEffect(() => {
@@ -54,6 +56,10 @@ export function ThreeMaze({ game, color, jumpSignal }: Props) {
 
     const survivor = createSurvivor(color)
     const monster = createMonster()
+    const gun = createGoldGun()
+    gun.visible = false
+    gun.position.set(0.13, 0.82, 0.27)
+    survivor.add(gun)
     scene.add(survivor, monster)
     const keyMeshes = level.keys.map((cell) => {
       const key = new THREE.Mesh(
@@ -79,6 +85,8 @@ export function ThreeMaze({ game, color, jumpSignal }: Props) {
     let lastPlayerCell = state.current.player
     let seenJump = jump.current
     let jumpFrame = 44
+    let seenShot = combat.current.shotSignal
+    let gunFrame = 90
     const resize = () => {
       const width = host.current?.clientWidth ?? 600
       const height = host.current?.clientHeight ?? 600
@@ -91,6 +99,7 @@ export function ThreeMaze({ game, color, jumpSignal }: Props) {
       const playerPos = positionFor(current.player, level.size)
       const monsterPos = positionFor(current.monster, level.size)
       if (jump.current !== seenJump) { seenJump = jump.current; jumpFrame = 0 }
+      if (combat.current.shotSignal !== seenShot) { seenShot = combat.current.shotSignal; gunFrame = 0 }
       const jumpProgress = jumpFrame / 44
       const moving = survivor.position.distanceTo(new THREE.Vector3(playerPos.x, 0, playerPos.z)) > 0.06
       if (current.player !== lastPlayerCell) {
@@ -111,6 +120,8 @@ export function ThreeMaze({ game, color, jumpSignal }: Props) {
       survivor.getObjectByName('leg-right')!.rotation.x = stride
       survivor.rotation.z = moving ? Math.sin(frame * 0.16) * 0.025 : 0
       monster.position.lerp(new THREE.Vector3(monsterPos.x, 0, monsterPos.z), 0.12)
+      monster.visible = !combat.current.spiderDead
+      gun.visible = gunFrame < 90
       camera.position.lerp(new THREE.Vector3(playerPos.x, 4.8, playerPos.z + 4.5), 0.08)
       camera.lookAt(playerPos.x, 0.45, playerPos.z)
       lamp.position.lerp(new THREE.Vector3(playerPos.x, 4, playerPos.z + 1.5), 0.1)
@@ -119,6 +130,7 @@ export function ThreeMaze({ game, color, jumpSignal }: Props) {
       door.material.emissive.setHex(current.keys.length === level.keys.length ? 0x8c3a16 : 0x210504)
       frame += 1
       jumpFrame += 1
+      gunFrame += 1
       renderer.render(scene, camera)
       animation = requestAnimationFrame(draw)
     }
