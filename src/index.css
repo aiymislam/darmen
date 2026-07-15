@@ -14,6 +14,7 @@ h1, h2 { font-family: Cinzel, serif; }
 .menu-actions button { padding: 14px 20px; border-radius: 3px; font-weight: 800; }
 .menu-primary { color: #fff; background: #923f35; border: 1px solid #b65a4d; }
 .menu-secondary { color: #e5eae7; background: #35483e; border: 1px solid #6e8177; }
+.menu-secondary.multiplayer { color: #fff; border-color: #4f8394; background: #315b68; }
 .guest-note { margin: 17px 0 0; color: #748078; font-size: 12px; }
 .auth-screen { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
 .auth-card { width: min(430px, 100%); padding: 38px; background: #202d27; border: 1px solid #66766d; box-shadow: 0 28px 80px #0009; }
@@ -27,6 +28,12 @@ h1, h2 { font-family: Cinzel, serif; }
 .auth-form button:disabled { opacity: .6; cursor: wait; }
 .auth-message { padding: 10px; background: #111a16; border-left: 3px solid #d2735f; font-size: 13px; }
 .auth-switch { width: 100%; padding: 12px; color: #aeb8b2; background: transparent; border: 0; }
+.race-lobby input { width: 100%; padding: 13px; color: white; text-align: center; letter-spacing: .2em; background: #111a16; border: 1px solid #58675f; }
+.lobby-create, .lobby-join { width: 100%; padding: 13px; color: white; background: #315b68; border: 1px solid #558596; font-weight: 800; }
+.room-divider { margin: 18px 0; color: #77837c; text-align: center; font-size: 11px; }
+.lobby-join { margin-top: 10px; background: #913f35; border-color: #b65a4d; }
+.race-status { display: flex; justify-content: space-between; margin: -3px 0 12px; padding: 10px 14px; color: #b9c9c0; background: #18313a; border: 1px solid #426977; font-size: 13px; }
+.race-lost { position: fixed; z-index: 12; top: 18px; left: 50%; transform: translateX(-50%); padding: 14px 22px; color: white; background: #9d3028; box-shadow: 0 10px 35px #0009; font-weight: 800; }
 .header-actions { display: flex; gap: 8px; }
 
 .start-screen { width: min(900px, 100%); min-height: 100vh; margin: auto; padding: 48px 20px; }

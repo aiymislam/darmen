@@ -2,9 +2,10 @@ type Props = {
   hasAccount: boolean
   onAccount: () => void
   onGuest: () => void
+  onMultiplayer: () => void
 }
 
-export function MainMenu({ hasAccount, onAccount, onGuest }: Props) {
+export function MainMenu({ hasAccount, onAccount, onGuest, onMultiplayer }: Props) {
   return (
     <main className="menu-screen">
       <section className="main-menu">
@@ -14,6 +15,7 @@ export function MainMenu({ hasAccount, onAccount, onGuest }: Props) {
         <div className="menu-actions">
           <button className="menu-primary" onClick={onAccount}>{hasAccount ? 'Continue with account' : 'Register or sign in'}</button>
           <button className="menu-secondary" onClick={onGuest}>Play as guest</button>
+          <button className="menu-secondary multiplayer" onClick={onMultiplayer}>Online race</button>
         </div>
         <p className="guest-note">Guest mode starts instantly without registration.</p>
       </section>
