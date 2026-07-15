@@ -7,6 +7,37 @@ import { createMonster, createSurvivor } from '../lib/models'
 type Props = { game: GameState; color: number }
 const positionFor = (cell: number, size: number) => ({ x: (cell % size) - size / 2 + 0.5, z: Math.floor(cell / size) - size / 2 + 0.5 })
 
+function createBloodyWallTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 256
+  canvas.height = 256
+  const context = canvas.getContext('2d')!
+  context.fillStyle = '#514744'
+  context.fillRect(0, 0, 256, 256)
+  context.strokeStyle = '#2c2726'
+  context.lineWidth = 5
+  for (let row = 32; row < 256; row += 48) {
+    context.beginPath(); context.moveTo(0, row); context.lineTo(256, row); context.stroke()
+  }
+  context.fillStyle = '#6d0808'
+  const stains = [[24, 0, 38, 155], [92, 0, 27, 210], [164, 0, 44, 128], [222, 0, 20, 186]]
+  stains.forEach(([x, y, width, height], index) => {
+    context.beginPath()
+    context.ellipse(x + width / 2, y + 18, width, 30, 0, 0, Math.PI * 2)
+    context.fill()
+    context.fillRect(x, y, width, height)
+    context.beginPath(); context.arc(x + width / 2, height + 12, width / 2, 0, Math.PI * 2); context.fill()
+    if (index % 2 === 0) context.fillRect(x + width, 20, 9, height * 0.55)
+  })
+  context.fillStyle = '#a20c0c'
+  context.globalAlpha = 0.62
+  context.beginPath(); context.ellipse(135, 76, 75, 35, -0.2, 0, Math.PI * 2); context.fill()
+  context.globalAlpha = 1
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  return texture
+}
+
 export function ThreeMaze({ game, color }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const state = useRef(game)
@@ -39,7 +70,12 @@ export function ThreeMaze({ game, color }: Props) {
     scene.add(floor)
 
     const wallGeometry = new THREE.BoxGeometry(0.9, 1.3, 0.9)
-    const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x66756c, roughness: 0.9 })
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      map: createBloodyWallTexture(),
+      color: 0xb9a6a0,
+      roughness: 0.94,
+      metalness: 0.02,
+    })
     const wallMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, level.walls.size)
     const matrix = new THREE.Matrix4()
     Array.from(level.walls).forEach((cell, index) => {
