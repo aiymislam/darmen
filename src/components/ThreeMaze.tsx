@@ -70,7 +70,7 @@ export function ThreeMaze({ game, color }: Props) {
     floor.receiveShadow = true
     scene.add(floor)
 
-    const wallGeometry = new THREE.BoxGeometry(0.9, 1.55, 0.9)
+    const wallGeometry = new THREE.BoxGeometry(0.9, 1.7, 0.9)
     const wallMaterial = new THREE.MeshStandardMaterial({
       map: createBloodyWallTexture(),
       color: 0xb9a6a0,
@@ -81,7 +81,7 @@ export function ThreeMaze({ game, color }: Props) {
     const matrix = new THREE.Matrix4()
     Array.from(level.walls).forEach((cell, index) => {
       const pos = positionFor(cell, level.size)
-      wallMesh.setMatrixAt(index, matrix.makeTranslation(pos.x, 0.775, pos.z))
+      wallMesh.setMatrixAt(index, matrix.makeTranslation(pos.x, 0.85, pos.z))
     })
     wallMesh.castShadow = true
     wallMesh.receiveShadow = true
