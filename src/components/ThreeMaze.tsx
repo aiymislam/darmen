@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GameState } from '../lib/game'
-import { levels } from '../lib/game'
+import { isNearMonster, levels } from '../lib/game'
 import { createMonster, createSurvivor } from '../lib/models'
 
 type Props = { game: GameState; color: number }
@@ -86,6 +86,7 @@ export function ThreeMaze({ game, color }: Props) {
       const current = state.current
       const playerPos = positionFor(current.player, level.size)
       const monsterPos = positionFor(current.monster, level.size)
+      const threatened = isNearMonster(current)
       const moving = survivor.position.distanceTo(new THREE.Vector3(playerPos.x, 0, playerPos.z)) > 0.06
       if (current.player !== lastPlayerCell) {
         const previous = positionFor(lastPlayerCell, level.size)
@@ -93,8 +94,12 @@ export function ThreeMaze({ game, color }: Props) {
         lastPlayerCell = current.player
       }
       survivor.position.lerp(new THREE.Vector3(playerPos.x, 0, playerPos.z), 0.42)
-      survivor.position.y = moving ? Math.abs(Math.sin(frame * 0.32)) * 0.06 : 0
-      const stride = moving ? Math.sin(frame * 0.32) * 0.58 : 0
+      survivor.position.y = threatened
+        ? Math.abs(Math.sin(frame * 0.34)) * 0.38
+        : moving ? Math.abs(Math.sin(frame * 0.32)) * 0.06 : 0
+      const stride = threatened
+        ? Math.sin(frame * 0.42) * 0.78
+        : moving ? Math.sin(frame * 0.32) * 0.58 : 0
       survivor.getObjectByName('arm-left')!.rotation.x = stride
       survivor.getObjectByName('arm-right')!.rotation.x = -stride
       survivor.getObjectByName('leg-left')!.rotation.x = -stride
