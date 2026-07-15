@@ -71,7 +71,7 @@ export function CharacterSelect({ onSelect }: Props) {
           </button>
         ))}
       </div>
-      <p className="warning">Hard difficulty · The spider moves once every two steps</p>
+      <p className="warning">Balanced difficulty · The spider gets faster in later levels</p>
     </main>
   )
 }
