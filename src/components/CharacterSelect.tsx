@@ -2,6 +2,23 @@ import type { CSSProperties } from 'react'
 
 export type Character = { name: string; color: number; colorHex: string; skill: string }
 
+const additionalNames = [
+  'Aria', 'Ethan', 'Chloe', 'Jack', 'Mia', 'Liam', 'Nora', 'Owen', 'Lily', 'Caleb',
+  'Zoe', 'Isaac', 'Grace', 'Ryan', 'Stella', 'Dylan', 'Alice', 'Evan', 'Sadie', 'Luke',
+  'Emma', 'Cole', 'Lucy', 'Jude', 'Freya', 'Dean', 'Cora', 'Seth', 'Tessa', 'Reid',
+  'Skye', 'Joel', 'Wren', 'Nico', 'Esme', 'Blake', 'June', 'Rowan', 'Elle', 'Asher',
+]
+
+const additionalCharacters: Character[] = additionalNames.map((name, index) => {
+  const color = ((0x354a62 + index * 0x173d29) & 0x7f7f7f) | 0x303030
+  return {
+    name,
+    color,
+    colorHex: `#${color.toString(16).padStart(6, '0')}`,
+    skill: `Labyrinth survivor ${index + 28}`,
+  }
+})
+
 export const characters: Character[] = [
   { name: 'Mara', color: 0x8f342e, colorHex: '#8f342e', skill: 'The fearless explorer' },
   { name: 'Noah', color: 0x344c62, colorHex: '#344c62', skill: 'The clever survivor' },
@@ -30,6 +47,7 @@ export const characters: Character[] = [
   { name: 'Milo', color: 0x526b63, colorHex: '#526b63', skill: 'The maze cartographer' },
   { name: 'Ava', color: 0x865171, colorHex: '#865171', skill: 'The daring adventurer' },
   { name: 'Ben', color: 0x65733f, colorHex: '#65733f', skill: 'The final survivor' },
+  ...additionalCharacters,
 ]
 
 type Props = { onSelect: (character: Character) => void }
