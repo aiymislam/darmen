@@ -4,13 +4,15 @@ import type { GameState } from '../lib/game'
 import { levels } from '../lib/game'
 import { createMonster, createSurvivor } from '../lib/models'
 
-type Props = { game: GameState; color: number }
+type Props = { game: GameState; color: number; jumpSignal: number }
 const positionFor = (cell: number, size: number) => ({ x: (cell % size) - size / 2 + 0.5, z: Math.floor(cell / size) - size / 2 + 0.5 })
 
-export function ThreeMaze({ game, color }: Props) {
+export function ThreeMaze({ game, color, jumpSignal }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const state = useRef(game)
+  const jump = useRef(jumpSignal)
   state.current = game
+  jump.current = jumpSignal
   const level = levels[game.level]
 
   useEffect(() => {
@@ -75,6 +77,8 @@ export function ThreeMaze({ game, color }: Props) {
     let frame = 0
     let animation = 0
     let lastPlayerCell = state.current.player
+    let seenJump = jump.current
+    let jumpFrame = 44
     const resize = () => {
       const width = host.current?.clientWidth ?? 600
       const height = host.current?.clientHeight ?? 600
@@ -86,6 +90,8 @@ export function ThreeMaze({ game, color }: Props) {
       const current = state.current
       const playerPos = positionFor(current.player, level.size)
       const monsterPos = positionFor(current.monster, level.size)
+      if (jump.current !== seenJump) { seenJump = jump.current; jumpFrame = 0 }
+      const jumpProgress = jumpFrame / 44
       const moving = survivor.position.distanceTo(new THREE.Vector3(playerPos.x, 0, playerPos.z)) > 0.06
       if (current.player !== lastPlayerCell) {
         const previous = positionFor(lastPlayerCell, level.size)
@@ -93,8 +99,12 @@ export function ThreeMaze({ game, color }: Props) {
         lastPlayerCell = current.player
       }
       survivor.position.lerp(new THREE.Vector3(playerPos.x, 0, playerPos.z), 0.42)
-      survivor.position.y = moving ? Math.abs(Math.sin(frame * 0.32)) * 0.06 : 0
-      const stride = moving ? Math.sin(frame * 0.32) * 0.58 : 0
+      survivor.position.y = jumpProgress < 1
+        ? Math.sin(jumpProgress * Math.PI) * 0.72
+        : moving ? Math.abs(Math.sin(frame * 0.32)) * 0.06 : 0
+      const stride = jumpProgress < 1
+        ? Math.sin(jumpProgress * Math.PI) * 0.8
+        : moving ? Math.sin(frame * 0.32) * 0.58 : 0
       survivor.getObjectByName('arm-left')!.rotation.x = stride
       survivor.getObjectByName('arm-right')!.rotation.x = -stride
       survivor.getObjectByName('leg-left')!.rotation.x = -stride
@@ -108,6 +118,7 @@ export function ThreeMaze({ game, color }: Props) {
       keyMeshes.forEach(({ cell, key }) => { key.visible = !current.keys.includes(cell); key.rotation.z += 0.025 })
       door.material.emissive.setHex(current.keys.length === level.keys.length ? 0x8c3a16 : 0x210504)
       frame += 1
+      jumpFrame += 1
       renderer.render(scene, camera)
       animation = requestAnimationFrame(draw)
     }

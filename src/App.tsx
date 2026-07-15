@@ -19,6 +19,7 @@ export default function App() {
   const [character, setCharacter] = useState<Character | null>(null)
   const [game, setGame] = useState(createGame)
   const [showJumpscare, setShowJumpscare] = useState(false)
+  const [jumpSignal, setJumpSignal] = useState(0)
   const [user, setUser] = useState<User | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const lastMoveAt = useRef(0)
@@ -57,9 +58,10 @@ export default function App() {
   useEffect(() => {
     const directions: Record<string, Direction> = {
       ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down',
-      ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right',
+      ArrowLeft: 'left', a: 'left', ArrowRight: 'right',
     }
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
       const direction = directions[event.key]
       if (direction) { event.preventDefault(); move(direction) }
     }
@@ -121,13 +123,14 @@ export default function App() {
         <span className={danger ? 'threat active' : 'threat'}>{danger ? 'IT IS CLOSE' : 'QUIET'}</span>
       </section>
       {playMode === 'multi' && <section className="race-status"><strong>Room: {roomCode}</strong><span>{opponent ? `${opponent.name}: ${opponent.status === 'won' ? 'escaped!' : 'racing'}` : 'Waiting for opponent…'}</span></section>}
-      <ThreeMaze game={game} color={character.color} />
+      <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} />
+      <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP · D</button>
       <nav className="controls" aria-label="Movement controls">
         {([['▲', 'up'], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']] as const).map(([label, direction]) => (
           <button className={direction} key={direction} onClick={() => move(direction)} aria-label={`Move ${direction}`}>{label}</button>
         ))}
       </nav>
-      <p className="instructions">Use WASD, arrow keys, or controls. Gather every key, then reach the door.</p>
+      <p className="instructions">Use W, A, S and arrow keys to move. Press D or the jump button to jump.</p>
       {showJumpscare && (
         <div className="jumpscare" aria-label="Spider jumpscare">
           <div className="scare-spider"><i className="scare-eye one" /><i className="scare-eye two" /><i className="scare-eye three" /><i className="scare-eye four" /><i className="fang left" /><i className="fang right" /></div>
