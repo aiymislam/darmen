@@ -33,7 +33,7 @@ export default function App() {
     if (gunCooldown > 0) return
     setShotSignal((signal) => signal + 1)
     setSpiderDead(true)
-    setGunCooldown(60)
+    setGunCooldown(15)
     window.setTimeout(() => setSpiderDead(false), 5000)
   }, [gunCooldown])
 
