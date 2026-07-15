@@ -65,7 +65,7 @@ export const levels: Level[] = levelNames.map((name, index) => {
     monster: corners[(index + 2) % corners.length],
     exit: corners[(index + 1) % corners.length],
     keys,
-    walls: makeMaze(size, 1847 + index * 3571),
+    walls: makeMaze(size, 92821 + index * 7919),
     speed: index < 10 ? 5 : index < 20 ? 4 : 3,
     color: lightColors[index % lightColors.length],
   }
