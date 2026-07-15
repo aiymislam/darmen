@@ -53,20 +53,20 @@ export default function App() {
     }
     const context = new AudioContext()
     musicContext.current = context
-    const playMelody = () => [523, 659, 784, 1047, 784, 659].forEach((frequency, index) => {
+    const playMelody = () => [523, 659, 784, 880, 1047, 880, 784, 659].forEach((frequency, index) => {
       const oscillator = context.createOscillator()
       const gain = context.createGain()
-      oscillator.type = 'sine'
+      oscillator.type = 'triangle'
       oscillator.frequency.value = frequency
-      gain.gain.setValueAtTime(0.0001, context.currentTime + index * 0.22)
-      gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + index * 0.22 + 0.02)
-      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + index * 0.22 + 0.19)
+      gain.gain.setValueAtTime(0.0001, context.currentTime + index * 0.15)
+      gain.gain.exponentialRampToValueAtTime(0.1, context.currentTime + index * 0.15 + 0.015)
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + index * 0.15 + 0.12)
       oscillator.connect(gain).connect(context.destination)
-      oscillator.start(context.currentTime + index * 0.22)
-      oscillator.stop(context.currentTime + index * 0.22 + 0.2)
+      oscillator.start(context.currentTime + index * 0.15)
+      oscillator.stop(context.currentTime + index * 0.15 + 0.13)
     })
     playMelody()
-    musicTimer.current = window.setInterval(playMelody, 1500)
+    musicTimer.current = window.setInterval(playMelody, 1320)
     setMusicOn(true)
   }, [musicOn])
 
