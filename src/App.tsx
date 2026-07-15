@@ -1,15 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { CharacterSelect } from './components/CharacterSelect'
 import type { Character } from './components/CharacterSelect'
+import { GameAuth } from './components/GameAuth'
 import { ThreeMaze } from './components/ThreeMaze'
 import { createGame, isNearMonster, levels, moveMonster, movePlayer } from './lib/game'
 import type { Direction } from './lib/game'
+import { supabase } from './lib/supabase'
 
 export default function App() {
   const [character, setCharacter] = useState<Character | null>(null)
   const [game, setGame] = useState(createGame)
   const [showJumpscare, setShowJumpscare] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const lastMoveAt = useRef(0)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => { setUser(data.user); setCheckingAuth(false) })
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null))
+    return () => data.subscription.unsubscribe()
+  }, [])
 
   const move = useCallback((direction: Direction) => {
     const now = performance.now()
@@ -53,6 +64,8 @@ export default function App() {
     return () => window.clearTimeout(timer)
   }, [game.status])
 
+  if (checkingAuth) return <main className="loading-screen">Opening the labyrinth…</main>
+  if (!user) return <GameAuth />
   if (!character) return <CharacterSelect onSelect={setCharacter} />
   const restart = () => { setShowJumpscare(false); setGame(createGame()) }
   const danger = isNearMonster(game)
@@ -65,7 +78,10 @@ export default function App() {
           <h1>Secrets of the Labyrinth</h1>
           <p className="level-name">Level {game.level + 1} of {levels.length} · {level.name}</p>
         </div>
-        <button className="text-button" onClick={() => { setCharacter(null); restart() }}>Change survivor</button>
+        <div className="header-actions">
+          <button className="text-button" onClick={() => { setCharacter(null); restart() }}>Change survivor</button>
+          <button className="text-button" onClick={() => supabase.auth.signOut()}>Sign out</button>
+        </div>
       </header>
       <section className="status-bar">
         <span className="survivor">Survivor: {character.name}</span>
