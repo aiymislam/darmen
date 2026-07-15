@@ -20,7 +20,8 @@ function createBloodyWallTexture() {
     context.beginPath(); context.moveTo(0, row); context.lineTo(256, row); context.stroke()
   }
   context.fillStyle = '#6d0808'
-  const stains = [[24, 0, 38, 155], [92, 0, 27, 210], [164, 0, 44, 128], [222, 0, 20, 186]]
+  context.globalAlpha = 0.48
+  const stains = [[30, 0, 24, 118], [105, 0, 18, 152], [178, 0, 28, 96], [230, 0, 12, 132]]
   stains.forEach(([x, y, width, height], index) => {
     context.beginPath()
     context.ellipse(x + width / 2, y + 18, width, 30, 0, 0, Math.PI * 2)
@@ -30,8 +31,8 @@ function createBloodyWallTexture() {
     if (index % 2 === 0) context.fillRect(x + width, 20, 9, height * 0.55)
   })
   context.fillStyle = '#a20c0c'
-  context.globalAlpha = 0.62
-  context.beginPath(); context.ellipse(135, 76, 75, 35, -0.2, 0, Math.PI * 2); context.fill()
+  context.globalAlpha = 0.34
+  context.beginPath(); context.ellipse(135, 76, 48, 22, -0.2, 0, Math.PI * 2); context.fill()
   context.globalAlpha = 1
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
@@ -69,7 +70,7 @@ export function ThreeMaze({ game, color }: Props) {
     floor.receiveShadow = true
     scene.add(floor)
 
-    const wallGeometry = new THREE.BoxGeometry(0.9, 1.3, 0.9)
+    const wallGeometry = new THREE.BoxGeometry(0.9, 1.55, 0.9)
     const wallMaterial = new THREE.MeshStandardMaterial({
       map: createBloodyWallTexture(),
       color: 0xb9a6a0,
@@ -80,7 +81,7 @@ export function ThreeMaze({ game, color }: Props) {
     const matrix = new THREE.Matrix4()
     Array.from(level.walls).forEach((cell, index) => {
       const pos = positionFor(cell, level.size)
-      wallMesh.setMatrixAt(index, matrix.makeTranslation(pos.x, 0.65, pos.z))
+      wallMesh.setMatrixAt(index, matrix.makeTranslation(pos.x, 0.775, pos.z))
     })
     wallMesh.castShadow = true
     wallMesh.receiveShadow = true
