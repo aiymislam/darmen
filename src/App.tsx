@@ -23,6 +23,7 @@ export default function App() {
   const [shotSignal, setShotSignal] = useState(0)
   const [spiderDead, setSpiderDead] = useState(false)
   const [gunCooldown, setGunCooldown] = useState(0)
+  const [musicOn, setMusicOn] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const lastMoveAt = useRef(0)
@@ -30,6 +31,8 @@ export default function App() {
   const raceChannel = useRef<RealtimeChannel | null>(null)
   const pressedKeys = useRef(new Set<string>())
   const pendingShot = useRef<number | null>(null)
+  const musicContext = useRef<AudioContext | null>(null)
+  const musicTimer = useRef<number | null>(null)
 
   const shoot = useCallback(() => {
     if (gunCooldown > 0) return
@@ -38,6 +41,34 @@ export default function App() {
     setGunCooldown(15)
     window.setTimeout(() => setSpiderDead(false), 5000)
   }, [gunCooldown])
+
+  const toggleMusic = useCallback(() => {
+    if (musicOn) {
+      if (musicTimer.current !== null) window.clearInterval(musicTimer.current)
+      musicContext.current?.close()
+      musicContext.current = null
+      musicTimer.current = null
+      setMusicOn(false)
+      return
+    }
+    const context = new AudioContext()
+    musicContext.current = context
+    const playMelody = () => [523, 659, 784, 1047, 784, 659].forEach((frequency, index) => {
+      const oscillator = context.createOscillator()
+      const gain = context.createGain()
+      oscillator.type = 'sine'
+      oscillator.frequency.value = frequency
+      gain.gain.setValueAtTime(0.0001, context.currentTime + index * 0.22)
+      gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + index * 0.22 + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + index * 0.22 + 0.19)
+      oscillator.connect(gain).connect(context.destination)
+      oscillator.start(context.currentTime + index * 0.22)
+      oscillator.stop(context.currentTime + index * 0.22 + 0.2)
+    })
+    playMelody()
+    musicTimer.current = window.setInterval(playMelody, 1500)
+    setMusicOn(true)
+  }, [musicOn])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => { setUser(data.user); setCheckingAuth(false) })
@@ -81,10 +112,11 @@ export default function App() {
         if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
         pendingShot.current = null
         setSpiderDead(false)
-        setGame((current) => createGame(29, current.steps))
+        setGame((current) => createGame(current.level === 29 ? 0 : 29, current.steps))
         return
       }
       if (key === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
+      if (key === 'u') { event.preventDefault(); if (!event.repeat) toggleMusic(); return }
       if (key === 'l') {
         event.preventDefault()
         if (!event.repeat) pendingShot.current = window.setTimeout(() => { pendingShot.current = null; shoot() }, 140)
@@ -102,7 +134,12 @@ export default function App() {
       if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
       pressedKeys.current.clear()
     }
-  }, [move, shoot])
+  }, [move, shoot, toggleMusic])
+
+  useEffect(() => () => {
+    if (musicTimer.current !== null) window.clearInterval(musicTimer.current)
+    musicContext.current?.close()
+  }, [])
 
   useEffect(() => {
     if (gunCooldown <= 0) return
@@ -167,6 +204,7 @@ export default function App() {
       <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} shotSignal={shotSignal} spiderDead={spiderDead} />
       <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP · D</button>
       <button className="weapon-button" onClick={shoot} disabled={gunCooldown > 0}>{gunCooldown > 0 ? `GUN COOLDOWN · ${gunCooldown}s` : 'FIRE GOLD GUN · L'}</button>
+      <button className={musicOn ? 'music-button active' : 'music-button'} onClick={toggleMusic}>{musicOn ? 'STOP HAPPY MUSIC · U' : 'HAPPY MUSIC · U'}</button>
       <nav className="controls" aria-label="Movement controls">
         {([['▲', 'up'], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']] as const).map(([label, direction]) => (
           <button className={direction} key={direction} onClick={() => move(direction)} aria-label={`Move ${direction}`}>{label}</button>
