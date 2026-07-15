@@ -81,7 +81,7 @@ export default function App() {
         if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
         pendingShot.current = null
         setSpiderDead(false)
-        setGame((current) => createGame(0, current.steps))
+        setGame((current) => createGame(29, current.steps))
         return
       }
       if (key === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
