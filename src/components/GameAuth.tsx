@@ -29,6 +29,19 @@ export function GameAuth({ onBack }: { onBack: () => void }) {
     setMessage('')
   }
 
+  const continueWithGoogle = async () => {
+    setBusy(true)
+    setMessage('')
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+    if (error) {
+      setMessage(error.message)
+      setBusy(false)
+    }
+  }
+
   return (
     <main className="auth-screen">
       <section className="auth-card">
@@ -40,6 +53,10 @@ export function GameAuth({ onBack }: { onBack: () => void }) {
           <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} /></label>
           <button type="submit" disabled={busy}>{busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Enter game'}</button>
         </form>
+        <div className="auth-divider"><span>OR</span></div>
+        <button className="google-button" onClick={continueWithGoogle} disabled={busy}>
+          <span className="google-mark">G</span> Continue with Google
+        </button>
         {message && <p className="auth-message" role="status">{message}</p>}
         <button className="auth-switch" onClick={switchMode}>
           {mode === 'signup' ? 'Already registered? Sign in' : 'Need an account? Register'}
