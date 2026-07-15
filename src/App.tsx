@@ -69,6 +69,7 @@ export default function App() {
       </header>
       <section className="status-bar">
         <span className="survivor">Survivor: {character.name}</span>
+        <span>Maze <strong>{level.size}×{level.size}</strong></span>
         <span>Keys <strong>{game.keys.length}/{level.keys.length}</strong></span>
         <span className={danger ? 'threat active' : 'threat'}>{danger ? 'IT IS CLOSE' : 'QUIET'}</span>
       </section>
