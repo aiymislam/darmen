@@ -28,6 +28,8 @@ export default function App() {
   const lastMoveAt = useRef(0)
   const playerId = useRef(crypto.randomUUID())
   const raceChannel = useRef<RealtimeChannel | null>(null)
+  const pressedKeys = useRef(new Set<string>())
+  const pendingShot = useRef<number | null>(null)
 
   const shoot = useCallback(() => {
     if (gunCooldown > 0) return
@@ -72,13 +74,34 @@ export default function App() {
       ArrowLeft: 'left', a: 'left', ArrowRight: 'right',
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
-      if (event.key.toLowerCase() === 'l') { event.preventDefault(); shoot(); return }
+      const key = event.key.toLowerCase()
+      pressedKeys.current.add(key)
+      if ((key === 'k' || key === 'l') && pressedKeys.current.has('k') && pressedKeys.current.has('l')) {
+        event.preventDefault()
+        if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
+        pendingShot.current = null
+        setSpiderDead(false)
+        setGame((current) => createGame(29, current.steps))
+        return
+      }
+      if (key === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
+      if (key === 'l') {
+        event.preventDefault()
+        if (!event.repeat) pendingShot.current = window.setTimeout(() => { pendingShot.current = null; shoot() }, 140)
+        return
+      }
       const direction = directions[event.key]
       if (direction) { event.preventDefault(); move(direction) }
     }
+    const onKeyUp = (event: KeyboardEvent) => pressedKeys.current.delete(event.key.toLowerCase())
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
+      pressedKeys.current.clear()
+    }
   }, [move, shoot])
 
   useEffect(() => {
