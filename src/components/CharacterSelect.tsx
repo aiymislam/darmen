@@ -39,7 +39,7 @@ export function CharacterSelect({ onSelect }: Props) {
     <main className="start-screen">
       <p className="kicker">A NIGHTMARE AWAITS</p>
       <h1>Secrets of the Labyrinth</h1>
-      <p className="intro">Survive three changing mazes. Find every cursed key. Do not let it find you.</p>
+      <p className="intro">Survive 30 changing mazes. Find every cursed key. Do not let it find you.</p>
       <h2>Choose your survivor</h2>
       <div className="characters">
         {characters.map((character) => (
@@ -53,7 +53,7 @@ export function CharacterSelect({ onSelect }: Props) {
           </button>
         ))}
       </div>
-      <p className="warning">Medium difficulty · The spider moves once every two steps</p>
+      <p className="warning">Extreme difficulty · The spider moves every time you move</p>
     </main>
   )
 }

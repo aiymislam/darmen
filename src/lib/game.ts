@@ -39,11 +39,36 @@ const makeMaze = (seed: number) => {
   return walls
 }
 
-export const levels: Level[] = [
-  { name: 'The Abandoned Ward', start: 400, monster: 22, exit: 40, keys: [362, 288, 156, 80], walls: makeMaze(1847), speed: 2, color: 0xe98566 },
-  { name: 'The Flooded Cells', start: 418, monster: 40, exit: 22, keys: [372, 276, 206, 112, 78], walls: makeMaze(7391), speed: 2, color: 0x56a7b8 },
-  { name: 'The Crimson Crypt', start: 400, monster: 40, exit: 22, keys: [410, 318, 248, 152, 76, 198], walls: makeMaze(12553), speed: 2, color: 0xd44537 },
+const levelNames = [
+  'The Abandoned Ward', 'The Flooded Cells', 'The Crimson Crypt', 'The Silent Library',
+  'The Broken Chapel', 'The Ashen Tunnels', 'The Moonlit Prison', 'The Forgotten Mine',
+  'The Whispering Halls', 'The Sunken Vault', 'The Hollow Factory', 'The Frozen Catacombs',
+  'The Twisted Garden', 'The Empty School', 'The Rusted Bunker', 'The Shadow Theater',
+  'The Buried Station', 'The Cursed Museum', 'The Blackened Hotel', 'The Ancient Sewers',
+  'The Lost Hospital', 'The Glass Passage', 'The Bleeding Keep', 'The Nameless Archive',
+  'The Spider Nest', 'The Last Sanctuary', 'The Endless Basement', 'The Dark Observatory',
+  'The Shattered Palace', 'The Final Labyrinth',
 ]
+const corners = [400, 418, 40, 22]
+const keySpots = [362, 372, 318, 288, 248, 206, 198, 160, 156, 152, 122, 112, 80, 78, 76]
+const lightColors = [0xe98566, 0x56a7b8, 0xd44537, 0x8e70bd, 0x6ea46e, 0xc19a55]
+
+export const levels: Level[] = levelNames.map((name, index) => {
+  const keyCount = 4 + Math.floor(index / 10)
+  const keys = Array.from({ length: keyCount }, (_, keyIndex) =>
+    keySpots[(index * 3 + keyIndex * 2) % keySpots.length],
+  )
+  return {
+    name,
+    start: corners[index % corners.length],
+    monster: corners[(index + 2) % corners.length],
+    exit: corners[(index + 1) % corners.length],
+    keys,
+    walls: makeMaze(1847 + index * 3571),
+    speed: 1,
+    color: lightColors[index % lightColors.length],
+  }
+})
 
 export const createGame = (level = 0, steps = 0): GameState => ({
   level,
