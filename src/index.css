@@ -66,6 +66,7 @@ header h1 { margin: 0; color: #e7e1d4; font-size: clamp(27px, 6vw, 42px); }
 .controls button { position: absolute; width: 50px; height: 50px; color: #edf2ef; background: #34473d; border: 1px solid #718278; border-radius: 3px; box-shadow: 0 4px 10px #0005; }
 .controls button:active { background: #82372f; }
 .controls .up { top: 0; left: 58px; }.controls .left { top: 56px; left: 2px; }.controls .down { top: 56px; left: 58px; }.controls .right { top: 56px; left: 114px; }
+.jump-button { display: block; width: 166px; margin: 16px auto -8px; padding: 12px; color: white; background: #a82920; border: 1px solid #ec5b4d; border-radius: 3px; font-weight: 900; letter-spacing: .14em; box-shadow: 0 0 22px #d22a2066; animation: pulse .55s infinite alternate; }
 .instructions { margin: 0; color: #5d6761; text-align: center; font-size: 12px; }
 
 .overlay { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: #030504dd; backdrop-filter: blur(7px); }

@@ -14,6 +14,7 @@ export default function App() {
   const [character, setCharacter] = useState<Character | null>(null)
   const [game, setGame] = useState(createGame)
   const [showJumpscare, setShowJumpscare] = useState(false)
+  const [jumpSignal, setJumpSignal] = useState(0)
   const [user, setUser] = useState<User | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const lastMoveAt = useRef(0)
@@ -93,7 +94,8 @@ export default function App() {
         <span>Keys <strong>{game.keys.length}/{level.keys.length}</strong></span>
         <span className={danger ? 'threat active' : 'threat'}>{danger ? 'IT IS CLOSE' : 'QUIET'}</span>
       </section>
-      <ThreeMaze game={game} color={character.color} />
+      <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} />
+      {danger && <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP!</button>}
       <nav className="controls" aria-label="Movement controls">
         {([['▲', 'up'], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']] as const).map(([label, direction]) => (
           <button className={direction} key={direction} onClick={() => move(direction)} aria-label={`Move ${direction}`}>{label}</button>
