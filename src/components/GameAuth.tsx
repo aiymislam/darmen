@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 
 type Mode = 'signup' | 'signin'
 
-export function GameAuth() {
+export function GameAuth({ onBack }: { onBack: () => void }) {
   const [mode, setMode] = useState<Mode>('signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -44,6 +44,7 @@ export function GameAuth() {
         <button className="auth-switch" onClick={switchMode}>
           {mode === 'signup' ? 'Already registered? Sign in' : 'Need an account? Register'}
         </button>
+        <button className="auth-switch" onClick={onBack}>Back to main menu</button>
       </section>
     </main>
   )

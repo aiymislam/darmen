@@ -3,12 +3,14 @@ import type { User } from '@supabase/supabase-js'
 import { CharacterSelect } from './components/CharacterSelect'
 import type { Character } from './components/CharacterSelect'
 import { GameAuth } from './components/GameAuth'
+import { MainMenu } from './components/MainMenu'
 import { ThreeMaze } from './components/ThreeMaze'
 import { createGame, isNearMonster, levels, moveMonster, movePlayer } from './lib/game'
 import type { Direction } from './lib/game'
 import { supabase } from './lib/supabase'
 
 export default function App() {
+  const [entryMode, setEntryMode] = useState<'account' | 'guest' | null>(null)
   const [character, setCharacter] = useState<Character | null>(null)
   const [game, setGame] = useState(createGame)
   const [showJumpscare, setShowJumpscare] = useState(false)
@@ -64,8 +66,9 @@ export default function App() {
     return () => window.clearTimeout(timer)
   }, [game.status])
 
-  if (checkingAuth) return <main className="loading-screen">Opening the labyrinth…</main>
-  if (!user) return <GameAuth />
+  if (!entryMode) return <MainMenu hasAccount={Boolean(user)} onAccount={() => setEntryMode('account')} onGuest={() => setEntryMode('guest')} />
+  if (entryMode === 'account' && checkingAuth) return <main className="loading-screen">Opening the labyrinth…</main>
+  if (entryMode === 'account' && !user) return <GameAuth onBack={() => setEntryMode(null)} />
   if (!character) return <CharacterSelect onSelect={setCharacter} />
   const restart = () => { setShowJumpscare(false); setGame(createGame()) }
   const danger = isNearMonster(game)
@@ -80,7 +83,8 @@ export default function App() {
         </div>
         <div className="header-actions">
           <button className="text-button" onClick={() => { setCharacter(null); restart() }}>Change survivor</button>
-          <button className="text-button" onClick={() => supabase.auth.signOut()}>Sign out</button>
+          <button className="text-button" onClick={() => { setCharacter(null); setEntryMode(null); restart() }}>Main menu</button>
+          {entryMode === 'account' && <button className="text-button" onClick={async () => { await supabase.auth.signOut(); setEntryMode(null) }}>Sign out</button>}
         </div>
       </header>
       <section className="status-bar">
