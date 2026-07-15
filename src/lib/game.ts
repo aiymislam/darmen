@@ -40,9 +40,9 @@ const makeMaze = (seed: number) => {
 }
 
 export const levels: Level[] = [
-  { name: 'The Abandoned Ward', start: 400, monster: 22, exit: 40, keys: [362, 288, 156, 80], walls: makeMaze(1847), speed: 3, color: 0xe98566 },
-  { name: 'The Flooded Cells', start: 418, monster: 40, exit: 22, keys: [372, 276, 206, 112, 78], walls: makeMaze(7391), speed: 3, color: 0x56a7b8 },
-  { name: 'The Crimson Crypt', start: 400, monster: 40, exit: 22, keys: [410, 318, 248, 152, 76, 198], walls: makeMaze(12553), speed: 3, color: 0xd44537 },
+  { name: 'The Abandoned Ward', start: 400, monster: 22, exit: 40, keys: [362, 288, 156, 80], walls: makeMaze(1847), speed: 2, color: 0xe98566 },
+  { name: 'The Flooded Cells', start: 418, monster: 40, exit: 22, keys: [372, 276, 206, 112, 78], walls: makeMaze(7391), speed: 2, color: 0x56a7b8 },
+  { name: 'The Crimson Crypt', start: 400, monster: 40, exit: 22, keys: [410, 318, 248, 152, 76, 198], walls: makeMaze(12553), speed: 2, color: 0xd44537 },
 ]
 
 export const createGame = (level = 0, steps = 0): GameState => ({
