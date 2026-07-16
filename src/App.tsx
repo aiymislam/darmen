@@ -94,8 +94,7 @@ export default function App() {
       const monster = firstMonsterStep
       const caught = !spiderDead && monster === player
       const escaped = player === level.exit && keys.length === level.keys.length
-      if (escaped && playMode === 'single' && current.level < levels.length - 1) return createGame(current.level + 1, steps)
-      return { ...current, player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'won' : 'playing' }
+      return { ...current, player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'escaping' : 'playing' }
     })
   }, [playMode, opponent, spiderDead])
 
@@ -107,12 +106,19 @@ export default function App() {
     const onKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase()
       pressedKeys.current.add(key)
+      if ((key === 'f' || key === 'g') && pressedKeys.current.has('f') && pressedKeys.current.has('g')) {
+        event.preventDefault()
+        setGame((current) => current.status === 'playing'
+          ? { ...current, keys: [...levels[current.level].keys] }
+          : current)
+        return
+      }
       if ((key === 'k' || key === 'l') && pressedKeys.current.has('k') && pressedKeys.current.has('l')) {
         event.preventDefault()
         if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
         pendingShot.current = null
         setSpiderDead(false)
-        setGame((current) => createGame(current.level === 29 ? 0 : 29, current.steps))
+        setGame((current) => createGame(current.level === levels.length - 1 ? 0 : levels.length - 1, current.steps))
         return
       }
       if (key === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
@@ -153,6 +159,20 @@ export default function App() {
     const timer = window.setTimeout(() => setShowJumpscare(false), 1250)
     return () => window.clearTimeout(timer)
   }, [game.status])
+
+  useEffect(() => {
+    if (game.status !== 'escaping') return
+    const timer = window.setTimeout(() => {
+      setGame((current) => {
+        if (current.status !== 'escaping') return current
+        if (playMode === 'single' && current.level < levels.length - 1) {
+          return createGame(current.level + 1, current.steps)
+        }
+        return { ...current, status: 'won' }
+      })
+    }, 3400)
+    return () => window.clearTimeout(timer)
+  }, [game.status, playMode])
 
   useEffect(() => {
     if (!roomCode || !character || playMode !== 'multi') return
@@ -202,14 +222,18 @@ export default function App() {
       </section>
       {playMode === 'multi' && <section className="race-status"><strong>Room: {roomCode}</strong><span>{opponent ? `${opponent.name}: ${opponent.status === 'won' ? 'escaped!' : 'racing'}` : 'Waiting for opponent…'}</span></section>}
       <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} shotSignal={shotSignal} spiderDead={spiderDead} />
-      <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP · D</button>
-      <button className="weapon-button" onClick={shoot} disabled={gunCooldown > 0}>{gunCooldown > 0 ? `GUN COOLDOWN · ${gunCooldown}s` : 'FIRE GOLD GUN · L'}</button>
-      <button className={musicOn ? 'music-button active' : 'music-button'} onClick={toggleMusic}>{musicOn ? 'STOP HAPPY MUSIC · U' : 'HAPPY MUSIC · U'}</button>
-      <nav className="controls" aria-label="Movement controls">
-        {([['▲', 'up'], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']] as const).map(([label, direction]) => (
-          <button className={direction} key={direction} onClick={() => move(direction)} aria-label={`Move ${direction}`}>{label}</button>
-        ))}
-      </nav>
+      <section className="touch-controls" aria-label="Game controls">
+        <nav className="controls" aria-label="Movement controls">
+          {([['▲', 'up'], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']] as const).map(([label, direction]) => (
+            <button className={direction} key={direction} onClick={() => move(direction)} aria-label={`Move ${direction}`}>{label}</button>
+          ))}
+        </nav>
+        <div className="action-controls">
+          <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP · D</button>
+          <button className="weapon-button" onClick={shoot} disabled={gunCooldown > 0}>{gunCooldown > 0 ? `COOLDOWN · ${gunCooldown}s` : 'FIRE · L'}</button>
+          <button className={musicOn ? 'music-button active' : 'music-button'} onClick={toggleMusic}>{musicOn ? 'MUSIC OFF · U' : 'MUSIC · U'}</button>
+        </div>
+      </section>
       <p className="instructions">Use W, A, S and arrow keys to move. Press D or the jump button to jump.</p>
       {showJumpscare && (
         <div className="jumpscare" aria-label="Spider jumpscare">
@@ -218,7 +242,7 @@ export default function App() {
         </div>
       )}
       {playMode === 'multi' && opponent?.status === 'won' && game.status === 'playing' && <div className="race-lost">Your opponent escaped first!</div>}
-      {game.status !== 'playing' && !showJumpscare && (
+      {(game.status === 'won' || game.status === 'lost') && !showJumpscare && (
         <div className="overlay"><section className="result-card">
           <span className={game.status === 'won' ? 'result-mark escaped' : 'result-mark caught'} />
           <p className="kicker">{game.status === 'won' ? 'YOU SURVIVED' : 'YOU WERE FOUND'}</p>

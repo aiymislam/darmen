@@ -9,7 +9,7 @@ export function MainMenu({ hasAccount, onAccount, onGuest, onMultiplayer }: Prop
   return (
     <main className="menu-screen">
       <section className="main-menu">
-        <p className="kicker">30 LEVELS · 67 SURVIVORS · ONE WAY OUT</p>
+        <p className="kicker">60 LEVELS · 67 SURVIVORS · ONE WAY OUT</p>
         <h1>Secrets of the Labyrinth</h1>
         <p className="menu-intro">Collect the cursed keys, escape the growing maze, and stay ahead of the spider.</p>
         <div className="menu-actions">

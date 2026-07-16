@@ -55,7 +55,15 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
     scene.add(wallMesh)
 
     const survivor = createSurvivor(color)
+    survivor.traverse((part) => {
+      if (part instanceof THREE.Mesh) {
+        const material = part.material as THREE.Material
+        material.transparent = true
+      }
+    })
     const monster = createMonster()
+    const rageLight = new THREE.PointLight(0xff1b0f, 0, 7)
+    scene.add(rageLight)
     const gun = createGoldGun()
     gun.visible = false
     gun.position.set(0.13, 0.82, 0.27)
@@ -87,6 +95,7 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
     let jumpFrame = 44
     let seenShot = combat.current.shotSignal
     let gunFrame = 90
+    let escapeStartedAt: number | null = null
     const resize = () => {
       const width = host.current?.clientWidth ?? 600
       const height = host.current?.clientHeight ?? 600
@@ -98,16 +107,26 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
       const current = state.current
       const playerPos = positionFor(current.player, level.size)
       const monsterPos = positionFor(current.monster, level.size)
+      if (current.status === 'escaping' && escapeStartedAt === null) escapeStartedAt = performance.now()
+      const escapeProgress = escapeStartedAt === null ? 0 : Math.min((performance.now() - escapeStartedAt) / 1600, 1)
+      const escapeElapsed = escapeStartedAt === null ? 0 : performance.now() - escapeStartedAt
+      const rageProgress = Math.max(0, Math.min((escapeElapsed - 1700) / 1400, 1))
+      const outward = new THREE.Vector3(exit.x, 0, exit.z).normalize()
+      const escapeTarget = new THREE.Vector3(
+        playerPos.x + outward.x * escapeProgress * 4.2,
+        0,
+        playerPos.z + outward.z * escapeProgress * 4.2,
+      )
       if (jump.current !== seenJump) { seenJump = jump.current; jumpFrame = 0 }
       if (combat.current.shotSignal !== seenShot) { seenShot = combat.current.shotSignal; gunFrame = 0 }
       const jumpProgress = jumpFrame / 44
-      const moving = survivor.position.distanceTo(new THREE.Vector3(playerPos.x, 0, playerPos.z)) > 0.06
+      const moving = current.status === 'escaping' || survivor.position.distanceTo(new THREE.Vector3(playerPos.x, 0, playerPos.z)) > 0.06
       if (current.player !== lastPlayerCell) {
         const previous = positionFor(lastPlayerCell, level.size)
         survivor.rotation.y = Math.atan2(playerPos.x - previous.x, playerPos.z - previous.z)
         lastPlayerCell = current.player
       }
-      survivor.position.lerp(new THREE.Vector3(playerPos.x, 0, playerPos.z), 0.42)
+      survivor.position.lerp(current.status === 'escaping' ? escapeTarget : new THREE.Vector3(playerPos.x, 0, playerPos.z), 0.42)
       survivor.position.y = jumpProgress < 1
         ? Math.sin(jumpProgress * Math.PI) * 0.72
         : moving ? Math.abs(Math.sin(frame * 0.32)) * 0.06 : 0
@@ -119,6 +138,14 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
       survivor.getObjectByName('leg-left')!.rotation.x = -stride
       survivor.getObjectByName('leg-right')!.rotation.x = stride
       survivor.rotation.z = moving ? Math.sin(frame * 0.16) * 0.025 : 0
+      if (current.status === 'escaping') {
+        survivor.rotation.y = Math.atan2(outward.x, outward.z)
+        const opacity = Math.max(0, 1 - Math.max(0, escapeProgress - 0.58) / 0.42)
+        survivor.traverse((part) => {
+          if (part instanceof THREE.Mesh) (part.material as THREE.Material).opacity = opacity
+        })
+        door.rotation.y = Math.sin(escapeProgress * Math.PI) * 1.15
+      }
       monster.position.lerp(new THREE.Vector3(monsterPos.x, 0, monsterPos.z), 0.12)
       monster.visible = !combat.current.spiderDead
       gun.visible = gunFrame < 90
@@ -126,6 +153,29 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
       camera.lookAt(playerPos.x, 0.45, playerPos.z)
       lamp.position.lerp(new THREE.Vector3(playerPos.x, 4, playerPos.z + 1.5), 0.1)
       monster.rotation.y = Math.sin(frame * 0.08) * 0.12
+      if (rageProgress > 0) {
+        survivor.visible = false
+        monster.visible = true
+        const rageShake = Math.sin(frame * 1.7) * 0.13 * rageProgress
+        monster.position.x = monsterPos.x + rageShake
+        monster.position.y = Math.abs(Math.sin(frame * 0.28)) * 0.32 * rageProgress
+        monster.rotation.z = Math.sin(frame * 1.3) * 0.16 * rageProgress
+        const rageScale = 1 + Math.sin(rageProgress * Math.PI) * 0.45
+        monster.scale.setScalar(rageScale)
+        monster.children.forEach((part, index) => {
+          if (part instanceof THREE.Group) part.rotation.y = Math.sin(frame * 0.55 + index) * 0.6 * rageProgress
+        })
+        monster.traverse((part) => {
+          if (part instanceof THREE.Mesh && part.material instanceof THREE.MeshStandardMaterial) {
+            part.material.emissive.setHex(0x7d0904)
+            part.material.emissiveIntensity = rageProgress * 1.8
+          }
+        })
+        rageLight.intensity = 65 * rageProgress
+        rageLight.position.set(monsterPos.x, 2, monsterPos.z + 1)
+        camera.position.lerp(new THREE.Vector3(monsterPos.x, 2.3, monsterPos.z + 3), 0.12)
+        camera.lookAt(monsterPos.x, 0.45, monsterPos.z)
+      }
       keyMeshes.forEach(({ cell, key }) => { key.visible = !current.keys.includes(cell); key.rotation.z += 0.025 })
       door.material.emissive.setHex(current.keys.length === level.keys.length ? 0x8c3a16 : 0x210504)
       frame += 1
