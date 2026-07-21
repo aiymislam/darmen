@@ -2,19 +2,19 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GameState } from '../lib/game'
 import { levels } from '../lib/game'
-import { createGoldGun, createMonster, createSurvivor } from '../lib/models'
+import { createDemon, createDiamondGun, createMonster, createSurvivor } from '../lib/models'
 
-type Props = { game: GameState; color: number; jumpSignal: number; shotSignal: number; spiderDead: boolean }
+type Props = { game: GameState; color: number; jumpSignal: number; shotSignal: number; spiderDead: boolean; invisible: boolean; hasDiamondGun: boolean }
 const positionFor = (cell: number, size: number) => ({ x: (cell % size) - size / 2 + 0.5, z: Math.floor(cell / size) - size / 2 + 0.5 })
 
-export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: Props) {
+export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead, invisible, hasDiamondGun }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const state = useRef(game)
   const jump = useRef(jumpSignal)
-  const combat = useRef({ shotSignal, spiderDead })
+  const combat = useRef({ shotSignal, spiderDead, invisible })
   state.current = game
   jump.current = jumpSignal
-  combat.current = { shotSignal, spiderDead }
+  combat.current = { shotSignal, spiderDead, invisible }
   const level = levels[game.level]
 
   useEffect(() => {
@@ -22,8 +22,10 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0x17211d)
     scene.fog = new THREE.FogExp2(0x17211d, 0.035)
-    const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 100)
-    camera.position.set(0, 5.3, 5.5)
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, level.size * 3)
+    camera.up.set(0, 0, -1)
+    camera.position.set(0, level.size * 1.5, 0.001)
+    camera.lookAt(0, 0, 0)
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
@@ -61,10 +63,10 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
         material.transparent = true
       }
     })
-    const monster = createMonster()
+    const monster = game.level >= 14 ? createDemon() : createMonster()
     const rageLight = new THREE.PointLight(0xff1b0f, 0, 7)
     scene.add(rageLight)
-    const gun = createGoldGun()
+    const gun = createDiamondGun()
     gun.visible = false
     gun.position.set(0.13, 0.82, 0.27)
     survivor.add(gun)
@@ -100,7 +102,13 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
       const width = host.current?.clientWidth ?? 600
       const height = host.current?.clientHeight ?? 600
       renderer.setSize(width, height, false)
-      camera.aspect = width / height
+      const aspect = width / height
+      const mazeView = level.size + 2
+      const halfHeight = (mazeView / 2) * Math.max(1, 1 / aspect)
+      camera.left = -halfHeight * aspect
+      camera.right = halfHeight * aspect
+      camera.top = halfHeight
+      camera.bottom = -halfHeight
       camera.updateProjectionMatrix()
     }
     const draw = () => {
@@ -148,9 +156,8 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
       }
       monster.position.lerp(new THREE.Vector3(monsterPos.x, 0, monsterPos.z), 0.12)
       monster.visible = !combat.current.spiderDead
-      gun.visible = gunFrame < 90
-      camera.position.lerp(new THREE.Vector3(playerPos.x, 4.8, playerPos.z + 4.5), 0.08)
-      camera.lookAt(playerPos.x, 0.45, playerPos.z)
+      gun.visible = hasDiamondGun && gunFrame < 90
+      if (current.status !== 'escaping') survivor.visible = !combat.current.invisible || Math.floor(frame / 8) % 2 === 0
       lamp.position.lerp(new THREE.Vector3(playerPos.x, 4, playerPos.z + 1.5), 0.1)
       monster.rotation.y = Math.sin(frame * 0.08) * 0.12
       if (rageProgress > 0) {
@@ -173,8 +180,6 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
         })
         rageLight.intensity = 65 * rageProgress
         rageLight.position.set(monsterPos.x, 2, monsterPos.z + 1)
-        camera.position.lerp(new THREE.Vector3(monsterPos.x, 2.3, monsterPos.z + 3), 0.12)
-        camera.lookAt(monsterPos.x, 0.45, monsterPos.z)
       }
       keyMeshes.forEach(({ cell, key }) => { key.visible = !current.keys.includes(cell); key.rotation.z += 0.025 })
       door.material.emissive.setHex(current.keys.length === level.keys.length ? 0x8c3a16 : 0x210504)
@@ -193,7 +198,7 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead }: P
       renderer.dispose()
       host.current?.replaceChildren()
     }
-  }, [color, game.level, level])
+  }, [color, game.level, level, hasDiamondGun])
 
   return <div className="three-maze" ref={host} aria-label="3D haunted maze" />
 }

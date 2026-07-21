@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import type { Language } from '../lib/i18n'
 
 export type Character = { name: string; color: number; colorHex: string; skill: string }
 
@@ -50,15 +51,37 @@ export const characters: Character[] = [
   ...additionalCharacters,
 ]
 
-type Props = { onSelect: (character: Character) => void }
+type Props = { onSelect: (character: Character) => void; language: Language }
 
-export function CharacterSelect({ onSelect }: Props) {
+const screenText = {
+  en: {
+    kicker: 'A NIGHTMARE AWAITS', title: 'Secrets of the Labyrinth',
+    intro: 'Survive 15 mazes that grow larger and harder after every escape. Find every cursed key.',
+    choose: 'Choose your survivor', survivor: 'Labyrinth survivor',
+    warning: 'Balanced difficulty · The spider gets faster in later levels',
+  },
+  ru: {
+    kicker: 'КОШМАР УЖЕ ЖДЁТ', title: 'Тайны лабиринта',
+    intro: 'Пройди 15 лабиринтов, которые становятся больше и сложнее. Найди все проклятые ключи.',
+    choose: 'Выбери выжившего', survivor: 'Выживший в лабиринте',
+    warning: 'Сбалансированная сложность · На поздних уровнях паук ускоряется',
+  },
+  kk: {
+    kicker: 'ҚОРҚЫНЫШ КҮТІП ТҰР', title: 'Лабиринт құпиялары',
+    intro: 'Барған сайын үлкейіп, қиындайтын 15 лабиринттен өт. Барлық қарғыс атқан кілттерді тап.',
+    choose: 'Аман қалушыны таңда', survivor: 'Лабиринттен аман қалушы',
+    warning: 'Теңгерімді қиындық · Кейінгі деңгейлерде өрмекші жылдамдайды',
+  },
+} satisfies Record<Language, Record<string, string>>
+
+export function CharacterSelect({ onSelect, language }: Props) {
+  const text = screenText[language]
   return (
     <main className="start-screen">
-      <p className="kicker">A NIGHTMARE AWAITS</p>
-      <h1>Secrets of the Labyrinth</h1>
-      <p className="intro">Survive 60 mazes that grow larger and harder after every escape. Find every cursed key.</p>
-      <h2>Choose your survivor</h2>
+      <p className="kicker">{text.kicker}</p>
+      <h1>{text.title}</h1>
+      <p className="intro">{text.intro}</p>
+      <h2>{text.choose}</h2>
       <div className="characters">
         {characters.map((character) => (
           <button className="character-card" key={character.name} onClick={() => onSelect(character)}>
@@ -67,11 +90,11 @@ export function CharacterSelect({ onSelect }: Props) {
               <i className="avatar-body" />
             </span>
             <strong>{character.name}</strong>
-            <small>{character.skill}</small>
+            <small>{language === 'en' ? character.skill : `${text.survivor} ${characters.indexOf(character) + 1}`}</small>
           </button>
         ))}
       </div>
-      <p className="warning">Balanced difficulty · The spider gets faster in later levels</p>
+      <p className="warning">{text.warning}</p>
     </main>
   )
 }

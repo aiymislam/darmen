@@ -72,14 +72,54 @@ export function createMonster() {
   return group
 }
 
-export function createGoldGun() {
+export function createDemon() {
   const group = new THREE.Group()
-  const gold = new THREE.MeshStandardMaterial({ color: 0xffc928, metalness: 0.82, roughness: 0.22 })
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.42), gold)
-  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.28, 10), gold)
+  const skin = new THREE.MeshStandardMaterial({ color: 0x7a1714, roughness: 0.72 })
+  const dark = new THREE.MeshStandardMaterial({ color: 0x1b0b0b, roughness: 0.88 })
+  const horn = new THREE.MeshStandardMaterial({ color: 0x2b2521, roughness: 0.7 })
+  const eyes = new THREE.MeshBasicMaterial({ color: 0xffb000 })
+
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 0.64, 8, 12), skin)
+  body.position.y = 0.78
+  body.scale.set(1.18, 1, 0.72)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 12), skin)
+  head.position.set(0, 1.42, 0.04)
+  group.add(body, head)
+
+  for (const side of [-1, 1]) {
+    const hornMesh = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.48, 10), horn)
+    hornMesh.position.set(side * 0.2, 1.72, 0)
+    hornMesh.rotation.z = side * -0.42
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), eyes)
+    eye.position.set(side * 0.105, 1.47, 0.27)
+
+    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.56, 6, 9), skin)
+    arm.position.set(side * 0.43, 0.88, 0)
+    arm.rotation.z = side * -0.28
+    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.54, 6, 9), dark)
+    leg.position.set(side * 0.18, 0.27, 0)
+    group.add(hornMesh, eye, arm, leg)
+  }
+
+  const wingGeometry = new THREE.ConeGeometry(0.4, 0.95, 3)
+  for (const side of [-1, 1]) {
+    const wing = new THREE.Mesh(wingGeometry, dark)
+    wing.position.set(side * 0.48, 1.02, -0.22)
+    wing.rotation.set(Math.PI / 2, 0, side * 0.48)
+    group.add(wing)
+  }
+  return group
+}
+
+export function createDiamondGun() {
+  const group = new THREE.Group()
+  const diamond = new THREE.MeshStandardMaterial({ color: 0x55e7ff, emissive: 0x075d73, metalness: 0.65, roughness: 0.12 })
+  const body = new THREE.Mesh(new THREE.OctahedronGeometry(0.13), diamond)
+  body.scale.z = 1.8
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.3, 8), diamond)
   barrel.rotation.x = Math.PI / 2
   barrel.position.z = 0.3
-  const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.1), gold)
+  const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.1), diamond)
   grip.position.set(0, -0.13, 0.03)
   grip.rotation.x = -0.25
   group.add(body, barrel, grip)

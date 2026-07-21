@@ -4,15 +4,22 @@ import type { RealtimeChannel } from '@supabase/supabase-js'
 import { CharacterSelect } from './components/CharacterSelect'
 import type { Character } from './components/CharacterSelect'
 import { GameAuth } from './components/GameAuth'
+import { GameShop } from './components/GameShop'
 import { MainMenu } from './components/MainMenu'
 import { MultiplayerLobby } from './components/MultiplayerLobby'
+import { PauseMenu } from './components/PauseMenu'
 import { ThreeMaze } from './components/ThreeMaze'
 import { createGame, isNearMonster, levels, moveMonster, movePlayer } from './lib/game'
 import type { Direction } from './lib/game'
+import { readLanguage, saveLanguage } from './lib/i18n'
+import type { Language } from './lib/i18n'
+import { buyItem, LEVEL_REWARD, loadInventory } from './lib/shop'
+import type { ShopItemId } from './lib/shop'
 import { supabase } from './lib/supabase'
 
 export default function App() {
   const [entryMode, setEntryMode] = useState<'account' | 'guest' | null>(null)
+  const [language, setLanguage] = useState<Language>(readLanguage)
   const [playMode, setPlayMode] = useState<'single' | 'multi'>('single')
   const [roomCode, setRoomCode] = useState<string | null>(null)
   const [opponent, setOpponent] = useState<{ name: string; status: string } | null>(null)
@@ -23,7 +30,11 @@ export default function App() {
   const [shotSignal, setShotSignal] = useState(0)
   const [spiderDead, setSpiderDead] = useState(false)
   const [gunCooldown, setGunCooldown] = useState(0)
+  const [inventory, setInventory] = useState(loadInventory)
+  const [shopOpen, setShopOpen] = useState(false)
+  const [invisible, setInvisible] = useState(false)
   const [musicOn, setMusicOn] = useState(false)
+  const [paused, setPaused] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const lastMoveAt = useRef(0)
@@ -33,14 +44,23 @@ export default function App() {
   const pendingShot = useRef<number | null>(null)
   const musicContext = useRef<AudioContext | null>(null)
   const musicTimer = useRef<number | null>(null)
+  const escapeRewarded = useRef(false)
 
   const shoot = useCallback(() => {
-    if (gunCooldown > 0) return
+    if (!inventory.diamondGun || gunCooldown > 0) return
     setShotSignal((signal) => signal + 1)
     setSpiderDead(true)
     setGunCooldown(15)
     window.setTimeout(() => setSpiderDead(false), 5000)
-  }, [gunCooldown])
+  }, [gunCooldown, inventory.diamondGun])
+
+  const purchase = (item: ShopItemId) => setInventory((current) => buyItem(current, item))
+  const useInvisibility = () => {
+    if (inventory.invisibilityPotions < 1 || invisible) return
+    setInventory((current) => ({ ...current, invisibilityPotions: current.invisibilityPotions - 1 }))
+    setInvisible(true)
+    window.setTimeout(() => setInvisible(false), 10000)
+  }
 
   const toggleMusic = useCallback(() => {
     if (musicOn) {
@@ -77,6 +97,7 @@ export default function App() {
   }, [])
 
   const move = useCallback((direction: Direction) => {
+    if (paused) return
     if (playMode === 'multi' && opponent?.status === 'won') return
     const now = performance.now()
     if (now - lastMoveAt.current < 150) return
@@ -90,13 +111,16 @@ export default function App() {
       const keys = level.keys.includes(player) && !current.keys.includes(player)
         ? [...current.keys, player]
         : current.keys
-      const firstMonsterStep = spiderDead ? current.monster : moveMonster(current.monster, player, steps, level)
+      const protectedFromMonster = spiderDead || invisible
+      const firstMonsterStep = protectedFromMonster ? current.monster : moveMonster(current.monster, player, steps, level)
       const monster = firstMonsterStep
-      const caught = !spiderDead && monster === player
+      const caught = !protectedFromMonster && monster === player
       const escaped = player === level.exit && keys.length === level.keys.length
       return { ...current, player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'escaping' : 'playing' }
     })
-  }, [playMode, opponent, spiderDead])
+  }, [playMode, opponent, spiderDead, invisible, paused])
+
+  useEffect(() => { localStorage.setItem('labyrinth-inventory', JSON.stringify(inventory)) }, [inventory])
 
   useEffect(() => {
     const directions: Record<string, Direction> = {
@@ -105,6 +129,12 @@ export default function App() {
     }
     const onKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase()
+      if (key === 'escape') {
+        event.preventDefault()
+        setPaused((current) => !current)
+        return
+      }
+      if (paused) return
       pressedKeys.current.add(key)
       if ((key === 'f' || key === 'g') && pressedKeys.current.has('f') && pressedKeys.current.has('g')) {
         event.preventDefault()
@@ -119,6 +149,13 @@ export default function App() {
         pendingShot.current = null
         setSpiderDead(false)
         setGame((current) => createGame(current.level === levels.length - 1 ? 0 : levels.length - 1, current.steps))
+        return
+      }
+      if (key === 'r') {
+        event.preventDefault()
+        setSpiderDead(false)
+        setShowJumpscare(false)
+        setGame((current) => createGame(14, current.steps))
         return
       }
       if (key === 'd') { event.preventDefault(); setJumpSignal((signal) => signal + 1); return }
@@ -140,7 +177,7 @@ export default function App() {
       if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
       pressedKeys.current.clear()
     }
-  }, [move, shoot, toggleMusic])
+  }, [move, paused, shoot, toggleMusic])
 
   useEffect(() => () => {
     if (musicTimer.current !== null) window.clearInterval(musicTimer.current)
@@ -155,9 +192,24 @@ export default function App() {
 
   useEffect(() => {
     if (game.status !== 'lost') return
+    if (inventory.respawnPotions > 0) {
+      setInventory((current) => ({ ...current, respawnPotions: current.respawnPotions - 1 }))
+      setGame((current) => createGame(current.level, current.steps))
+      return
+    }
     setShowJumpscare(true)
     const timer = window.setTimeout(() => setShowJumpscare(false), 1250)
     return () => window.clearTimeout(timer)
+  }, [game.status, inventory.respawnPotions])
+
+  useEffect(() => {
+    if (game.status === 'playing') {
+      escapeRewarded.current = false
+      return
+    }
+    if (game.status !== 'escaping' || escapeRewarded.current) return
+    escapeRewarded.current = true
+    setInventory((current) => ({ ...current, coins: current.coins + LEVEL_REWARD }))
   }, [game.status])
 
   useEffect(() => {
@@ -192,11 +244,11 @@ export default function App() {
     raceChannel.current?.track({ playerId: playerId.current, name: character?.name, status: game.status })
   }, [game.status, character])
 
-  if (!entryMode) return <MainMenu hasAccount={Boolean(user)} onAccount={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('account') }} onGuest={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('guest') }} onMultiplayer={() => { setRoomCode(null); setPlayMode('multi'); setEntryMode('guest') }} />
+  if (!entryMode) return <MainMenu hasAccount={Boolean(user)} language={language} onLanguageChange={(nextLanguage) => { setLanguage(nextLanguage); saveLanguage(nextLanguage) }} onAccount={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('account') }} onGuest={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('guest') }} onMultiplayer={() => { setRoomCode(null); setPlayMode('multi'); setEntryMode('guest') }} />
   if (entryMode === 'account' && checkingAuth) return <main className="loading-screen">Opening the labyrinth…</main>
   if (entryMode === 'account' && !user) return <GameAuth onBack={() => setEntryMode(null)} />
   if (playMode === 'multi' && !roomCode) return <MultiplayerLobby onJoin={setRoomCode} onBack={() => setEntryMode(null)} />
-  if (!character) return <CharacterSelect onSelect={setCharacter} />
+  if (!character) return <CharacterSelect language={language} onSelect={setCharacter} />
   const restart = () => { setShowJumpscare(false); setGame(createGame()) }
   const danger = isNearMonster(game)
   const level = levels[game.level]
@@ -209,6 +261,7 @@ export default function App() {
           <p className="level-name">Level {game.level + 1} of {levels.length} · {level.name}</p>
         </div>
         <div className="header-actions">
+          <button className="text-button" onClick={() => setPaused(true)}>Pause</button>
           <button className="text-button" onClick={() => { setCharacter(null); restart() }}>Change survivor</button>
           <button className="text-button" onClick={() => { setCharacter(null); setRoomCode(null); setOpponent(null); setEntryMode(null); restart() }}>Main menu</button>
           {entryMode === 'account' && <button className="text-button" onClick={async () => { await supabase.auth.signOut(); setEntryMode(null) }}>Sign out</button>}
@@ -218,10 +271,11 @@ export default function App() {
         <span className="survivor">Survivor: {character.name}</span>
         <span>Maze <strong>{level.size}×{level.size}</strong></span>
         <span>Keys <strong>{game.keys.length}/{level.keys.length}</strong></span>
+        <span>Coins <strong>🪙 {inventory.coins}</strong></span>
         <span className={danger ? 'threat active' : 'threat'}>{danger ? 'IT IS CLOSE' : 'QUIET'}</span>
       </section>
       {playMode === 'multi' && <section className="race-status"><strong>Room: {roomCode}</strong><span>{opponent ? `${opponent.name}: ${opponent.status === 'won' ? 'escaped!' : 'racing'}` : 'Waiting for opponent…'}</span></section>}
-      <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} shotSignal={shotSignal} spiderDead={spiderDead} />
+      <ThreeMaze game={game} color={character.color} jumpSignal={jumpSignal} shotSignal={shotSignal} spiderDead={spiderDead} invisible={invisible} hasDiamondGun={inventory.diamondGun} />
       <section className="touch-controls" aria-label="Game controls">
         <nav className="controls" aria-label="Movement controls">
           {([['▲', 'up'], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']] as const).map(([label, direction]) => (
@@ -230,14 +284,22 @@ export default function App() {
         </nav>
         <div className="action-controls">
           <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP · D</button>
-          <button className="weapon-button" onClick={shoot} disabled={gunCooldown > 0}>{gunCooldown > 0 ? `COOLDOWN · ${gunCooldown}s` : 'FIRE · L'}</button>
+          <button className="weapon-button" onClick={shoot} disabled={!inventory.diamondGun || gunCooldown > 0}>{!inventory.diamondGun ? 'DIAMOND GUN · SHOP' : gunCooldown > 0 ? `COOLDOWN · ${gunCooldown}s` : 'FIRE · L'}</button>
+          <button className="potion-button" onClick={useInvisibility} disabled={inventory.invisibilityPotions < 1 || invisible}>{invisible ? 'INVISIBLE · 10s' : `INVISIBILITY · ${inventory.invisibilityPotions}`}</button>
+          <button className="shop-button" onClick={() => setShopOpen(true)}>SHOP · 90 🪙</button>
           <button className={musicOn ? 'music-button active' : 'music-button'} onClick={toggleMusic}>{musicOn ? 'MUSIC OFF · U' : 'MUSIC · U'}</button>
         </div>
       </section>
-      <p className="instructions">Use W, A, S and arrow keys to move. Press D or the jump button to jump.</p>
+      <p className="inventory-line">❤️ Respawn potions: {inventory.respawnPotions} · 👻 Invisibility potions: {inventory.invisibilityPotions}</p>
+      <p className="instructions">Use W, A, S and arrow keys to move. Press D to jump or R to travel to Level 15.</p>
+      {paused && <PauseMenu
+        onResume={() => setPaused(false)}
+        onRestart={() => { setPaused(false); setGame((current) => createGame(current.level, current.steps)) }}
+        onMainMenu={() => { setPaused(false); setCharacter(null); setRoomCode(null); setOpponent(null); setEntryMode(null); restart() }}
+      />}
       {showJumpscare && (
-        <div className="jumpscare" aria-label="Spider jumpscare">
-          <div className="scare-spider"><i className="scare-eye one" /><i className="scare-eye two" /><i className="scare-eye three" /><i className="scare-eye four" /><i className="fang left" /><i className="fang right" /></div>
+        <div className="jumpscare" aria-label={game.level >= 14 ? 'Demon jumpscare' : 'Spider jumpscare'}>
+          <div className={game.level >= 14 ? 'scare-spider scare-demon' : 'scare-spider'}><i className="scare-eye one" /><i className="scare-eye two" /><i className="scare-eye three" /><i className="scare-eye four" /><i className="fang left" /><i className="fang right" /></div>
           <strong>CAUGHT</strong>
         </div>
       )}
@@ -251,6 +313,7 @@ export default function App() {
           <button onClick={restart}>Enter again</button>
         </section></div>
       )}
+      <GameShop inventory={inventory} open={shopOpen} onBuy={purchase} onClose={() => setShopOpen(false)} />
     </main>
   )
 }

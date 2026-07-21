@@ -41,19 +41,7 @@ const levelNames = [
   'The Abandoned Ward', 'The Flooded Cells', 'The Crimson Crypt', 'The Silent Library',
   'The Broken Chapel', 'The Ashen Tunnels', 'The Moonlit Prison', 'The Forgotten Mine',
   'The Whispering Halls', 'The Sunken Vault', 'The Hollow Factory', 'The Frozen Catacombs',
-  'The Twisted Garden', 'The Empty School', 'The Rusted Bunker', 'The Shadow Theater',
-  'The Buried Station', 'The Cursed Museum', 'The Blackened Hotel', 'The Ancient Sewers',
-  'The Lost Hospital', 'The Glass Passage', 'The Bleeding Keep', 'The Nameless Archive',
-  'The Spider Nest', 'The Last Sanctuary', 'The Endless Basement', 'The Dark Observatory',
-  'The Shattered Palace', 'The Final Labyrinth',
-  'The Forsaken Courtyard', 'The Crooked Monastery', 'The Buried Ballroom', 'The Iron Nursery',
-  'The Howling Reservoir', 'The Candlelit Morgue', 'The Bone Orchard', 'The Drowned Cathedral',
-  'The Clockwork Tomb', 'The Scarlet Greenhouse', 'The Phantom Barracks', 'The Warden’s Passage',
-  'The Sinking Mansion', 'The Cobwebbed Gallery', 'The Mourning Tower', 'The Poisoned Cloister',
-  'The Chained Arena', 'The Mirror Catacomb', 'The Weeping Foundry', 'The Forgotten Carnival',
-  'The Bloodless Kitchen', 'The Grinning Dungeon', 'The Sleepless Crypt', 'The Spider’s Cathedral',
-  'The Last Prison', 'The Queen’s Web', 'The Collapsing Depths', 'The Heart of Darkness',
-  'The Devouring Maze', 'The Final Escape',
+  'The Twisted Garden', 'The Empty School', 'The Final Escape',
 ]
 const lightColors = [0xe98566, 0x56a7b8, 0xd44537, 0x8e70bd, 0x6ea46e, 0xc19a55]
 
