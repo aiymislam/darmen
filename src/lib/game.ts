@@ -90,8 +90,7 @@ export const movePlayer = (position: number, direction: Direction, level: Level)
 const distance = (from: number, to: number, size: number) =>
   Math.abs(Math.floor(from / size) - Math.floor(to / size)) + Math.abs((from % size) - (to % size))
 
-export const moveMonster = (monster: number, player: number, steps: number, level: Level) => {
-  if (steps % level.speed !== 0) return monster
+export const chaseMonster = (monster: number, player: number, level: Level) => {
   const queue: Array<{ cell: number; first: number }> = [{ cell: monster, first: monster }]
   const visited = new Set([monster])
   while (queue.length > 0) {
@@ -108,5 +107,8 @@ export const moveMonster = (monster: number, player: number, steps: number, leve
   }
   return monster
 }
+
+export const moveMonster = (monster: number, player: number, steps: number, level: Level) =>
+  steps % level.speed === 0 ? chaseMonster(monster, player, level) : monster
 
 export const isNearMonster = (state: GameState) => distance(state.player, state.monster, levels[state.level].size) <= 3

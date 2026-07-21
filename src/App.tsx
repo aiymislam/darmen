@@ -6,10 +6,11 @@ import type { Character } from './components/CharacterSelect'
 import { GameAuth } from './components/GameAuth'
 import { GameShop } from './components/GameShop'
 import { MainMenu } from './components/MainMenu'
+import { Leaderboard } from './components/Leaderboard'
 import { MultiplayerLobby } from './components/MultiplayerLobby'
 import { PauseMenu } from './components/PauseMenu'
 import { ThreeMaze } from './components/ThreeMaze'
-import { createGame, isNearMonster, levels, moveMonster, movePlayer } from './lib/game'
+import { chaseMonster, createGame, isNearMonster, levels, movePlayer } from './lib/game'
 import type { Direction } from './lib/game'
 import { readLanguage, saveLanguage } from './lib/i18n'
 import type { Language } from './lib/i18n'
@@ -18,7 +19,7 @@ import type { ShopItemId } from './lib/shop'
 import { supabase } from './lib/supabase'
 
 export default function App() {
-  const [entryMode, setEntryMode] = useState<'account' | 'guest' | null>(null)
+  const [entryMode, setEntryMode] = useState<'account' | 'guest' | 'leaderboard' | null>(null)
   const [language, setLanguage] = useState<Language>(readLanguage)
   const [playMode, setPlayMode] = useState<'single' | 'multi'>('single')
   const [roomCode, setRoomCode] = useState<string | null>(null)
@@ -41,7 +42,6 @@ export default function App() {
   const playerId = useRef(crypto.randomUUID())
   const raceChannel = useRef<RealtimeChannel | null>(null)
   const pressedKeys = useRef(new Set<string>())
-  const pendingShot = useRef<number | null>(null)
   const musicContext = useRef<AudioContext | null>(null)
   const musicTimer = useRef<number | null>(null)
   const escapeRewarded = useRef(false)
@@ -112,13 +112,25 @@ export default function App() {
         ? [...current.keys, player]
         : current.keys
       const protectedFromMonster = spiderDead || invisible
-      const firstMonsterStep = protectedFromMonster ? current.monster : moveMonster(current.monster, player, steps, level)
-      const monster = firstMonsterStep
+      const monster = current.monster
       const caught = !protectedFromMonster && monster === player
       const escaped = player === level.exit && keys.length === level.keys.length
       return { ...current, player, monster, keys, steps, status: caught ? 'lost' : escaped ? 'escaping' : 'playing' }
     })
   }, [playMode, opponent, spiderDead, invisible, paused])
+
+  useEffect(() => {
+    if (paused || spiderDead || invisible) return
+    const chaseDelay = game.level < 5 ? 900 : game.level < 10 ? 760 : 640
+    const timer = window.setInterval(() => {
+      setGame((current) => {
+        if (current.status !== 'playing') return current
+        const monster = chaseMonster(current.monster, current.player, levels[current.level])
+        return { ...current, monster, status: monster === current.player ? 'lost' : current.status }
+      })
+    }, chaseDelay)
+    return () => window.clearInterval(timer)
+  }, [game.level, game.status, invisible, paused, spiderDead])
 
   useEffect(() => { localStorage.setItem('labyrinth-inventory', JSON.stringify(inventory)) }, [inventory])
 
@@ -143,14 +155,6 @@ export default function App() {
           : current)
         return
       }
-      if ((key === 'k' || key === 'l') && pressedKeys.current.has('k') && pressedKeys.current.has('l')) {
-        event.preventDefault()
-        if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
-        pendingShot.current = null
-        setSpiderDead(false)
-        setGame((current) => createGame(current.level === levels.length - 1 ? 0 : levels.length - 1, current.steps))
-        return
-      }
       if (key === 'r') {
         event.preventDefault()
         setSpiderDead(false)
@@ -162,7 +166,7 @@ export default function App() {
       if (key === 'u') { event.preventDefault(); if (!event.repeat) toggleMusic(); return }
       if (key === 'l') {
         event.preventDefault()
-        if (!event.repeat) pendingShot.current = window.setTimeout(() => { pendingShot.current = null; shoot() }, 140)
+        if (!event.repeat) shoot()
         return
       }
       const direction = directions[event.key]
@@ -174,7 +178,6 @@ export default function App() {
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
-      if (pendingShot.current !== null) window.clearTimeout(pendingShot.current)
       pressedKeys.current.clear()
     }
   }, [move, paused, shoot, toggleMusic])
@@ -213,6 +216,17 @@ export default function App() {
   }, [game.status])
 
   useEffect(() => {
+    if (!user || entryMode !== 'account') return
+    const displayName = user.user_metadata.full_name || user.user_metadata.name || user.email?.split('@')[0] || 'Survivor'
+    supabase.rpc('record_player_progress', {
+      player_name: displayName,
+      reached_level: game.level + 1,
+    }).then(({ error }) => {
+      if (error) console.error('Could not update leaderboard:', error.message)
+    })
+  }, [entryMode, game.level, user])
+
+  useEffect(() => {
     if (game.status !== 'escaping') return
     const timer = window.setTimeout(() => {
       setGame((current) => {
@@ -244,7 +258,8 @@ export default function App() {
     raceChannel.current?.track({ playerId: playerId.current, name: character?.name, status: game.status })
   }, [game.status, character])
 
-  if (!entryMode) return <MainMenu hasAccount={Boolean(user)} language={language} onLanguageChange={(nextLanguage) => { setLanguage(nextLanguage); saveLanguage(nextLanguage) }} onAccount={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('account') }} onGuest={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('guest') }} onMultiplayer={() => { setRoomCode(null); setPlayMode('multi'); setEntryMode('guest') }} />
+  if (!entryMode) return <MainMenu hasAccount={Boolean(user)} language={language} onLanguageChange={(nextLanguage) => { setLanguage(nextLanguage); saveLanguage(nextLanguage) }} onAccount={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('account') }} onGuest={() => { setRoomCode(null); setPlayMode('single'); setEntryMode('guest') }} onMultiplayer={() => { setRoomCode(null); setPlayMode('multi'); setEntryMode('guest') }} onLeaderboard={() => setEntryMode('leaderboard')} />
+  if (entryMode === 'leaderboard') return <Leaderboard onBack={() => setEntryMode(null)} />
   if (entryMode === 'account' && checkingAuth) return <main className="loading-screen">Opening the labyrinth…</main>
   if (entryMode === 'account' && !user) return <GameAuth onBack={() => setEntryMode(null)} />
   if (playMode === 'multi' && !roomCode) return <MultiplayerLobby onJoin={setRoomCode} onBack={() => setEntryMode(null)} />

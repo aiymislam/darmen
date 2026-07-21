@@ -17,6 +17,18 @@ h1, h2 { font-family: Cinzel, serif; }
 .menu-primary { color: #fff; background: #923f35; border: 1px solid #b65a4d; }
 .menu-secondary { color: #e5eae7; background: #35483e; border: 1px solid #6e8177; }
 .menu-secondary.multiplayer { color: #fff; border-color: #4f8394; background: #315b68; }
+.leaderboard-button { border-color: #8c7343; background: #55472d; }
+.leaderboard-card { width: min(650px, 100%); padding: clamp(28px, 6vw, 52px); background: linear-gradient(145deg, #26372fdd, #121b17f2); border: 1px solid #66766d; box-shadow: 0 35px 100px #000b; }
+.leaderboard-card h1 { margin: 5px 0 8px; color: #f2ede1; font-size: clamp(38px, 8vw, 62px); }
+.leaderboard-intro, .leaderboard-message { color: #99a59e; }
+.leaderboard-list { margin: 28px 0; padding: 0; list-style: none; text-align: left; }
+.leaderboard-list li { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 14px 12px; border-bottom: 1px solid #3e4b44; }
+.leaderboard-list li:first-child { color: #ffd76c; background: #6b562633; }
+.leaderboard-list li:nth-child(2) { color: #d8dfdc; }
+.leaderboard-list li:nth-child(3) { color: #d1946b; }
+.leaderboard-rank { color: #7f8b84; font-weight: 800; }
+.leaderboard-list li > span:last-child { font-size: 13px; font-weight: 700; }
+.leaderboard-back { width: 100%; padding: 13px; color: #eee7d9; background: #8c3b32; border: 0; border-radius: 3px; font-weight: 700; }
 .guest-note { margin: 17px 0 0; color: #748078; font-size: 12px; }
 .auth-screen { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
 .auth-card { width: min(430px, 100%); padding: 38px; background: #202d27; border: 1px solid #66766d; box-shadow: 0 28px 80px #0009; }

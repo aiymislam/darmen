@@ -22,10 +22,11 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead, inv
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0x17211d)
     scene.fog = new THREE.FogExp2(0x17211d, 0.035)
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, level.size * 3)
-    camera.up.set(0, 0, -1)
-    camera.position.set(0, level.size * 1.5, 0.001)
-    camera.lookAt(0, 0, 0)
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, Math.max(80, level.size * 3))
+    const initialPlayer = positionFor(game.player, level.size)
+    camera.position.set(initialPlayer.x, 7.5, initialPlayer.z + 7.5)
+    camera.lookAt(initialPlayer.x, 0.6, initialPlayer.z)
+    const cameraTarget = new THREE.Vector3(initialPlayer.x, 0.6, initialPlayer.z)
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
@@ -102,19 +103,17 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead, inv
       const width = host.current?.clientWidth ?? 600
       const height = host.current?.clientHeight ?? 600
       renderer.setSize(width, height, false)
-      const aspect = width / height
-      const mazeView = level.size + 2
-      const halfHeight = (mazeView / 2) * Math.max(1, 1 / aspect)
-      camera.left = -halfHeight * aspect
-      camera.right = halfHeight * aspect
-      camera.top = halfHeight
-      camera.bottom = -halfHeight
+      camera.aspect = width / height
       camera.updateProjectionMatrix()
     }
     const draw = () => {
       const current = state.current
       const playerPos = positionFor(current.player, level.size)
       const monsterPos = positionFor(current.monster, level.size)
+      const desiredCameraPosition = new THREE.Vector3(playerPos.x, 7.5, playerPos.z + 7.5)
+      camera.position.lerp(desiredCameraPosition, 0.1)
+      cameraTarget.lerp(new THREE.Vector3(playerPos.x, 0.6, playerPos.z), 0.14)
+      camera.lookAt(cameraTarget)
       if (current.status === 'escaping' && escapeStartedAt === null) escapeStartedAt = performance.now()
       const escapeProgress = escapeStartedAt === null ? 0 : Math.min((performance.now() - escapeStartedAt) / 1600, 1)
       const escapeElapsed = escapeStartedAt === null ? 0 : performance.now() - escapeStartedAt
