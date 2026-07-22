@@ -14,7 +14,7 @@ import { chaseMonster, createGame, isNearMonster, levels, movePlayer } from './l
 import type { Direction } from './lib/game'
 import { readLanguage, saveLanguage } from './lib/i18n'
 import type { Language } from './lib/i18n'
-import { buyItem, LEVEL_REWARD, loadInventory } from './lib/shop'
+import { buyItem, LEVEL_REWARD, loadInventory, STARTER_COINS } from './lib/shop'
 import type { ShopItemId } from './lib/shop'
 import { supabase } from './lib/supabase'
 
@@ -55,6 +55,10 @@ export default function App() {
   }, [gunCooldown])
 
   const purchase = (item: ShopItemId) => setInventory((current) => buyItem(current, item))
+  const selectCharacter = (selectedCharacter: Character) => {
+    setInventory((current) => ({ ...current, coins: Math.max(current.coins, STARTER_COINS) }))
+    setCharacter(selectedCharacter)
+  }
   const useInvisibility = () => {
     if (inventory.invisibilityPotions < 1 || invisible) return
     setInventory((current) => ({ ...current, invisibilityPotions: current.invisibilityPotions - 1 }))
@@ -263,7 +267,7 @@ export default function App() {
   if (entryMode === 'account' && checkingAuth) return <main className="loading-screen">Opening the labyrinth…</main>
   if (entryMode === 'account' && !user) return <GameAuth onBack={() => setEntryMode(null)} />
   if (playMode === 'multi' && !roomCode) return <MultiplayerLobby onJoin={setRoomCode} onBack={() => setEntryMode(null)} />
-  if (!character) return <CharacterSelect language={language} onSelect={setCharacter} />
+  if (!character) return <CharacterSelect language={language} onSelect={selectCharacter} />
   const restart = () => { setShowJumpscare(false); setGame(createGame()) }
   const danger = isNearMonster(game)
   const level = levels[game.level]
