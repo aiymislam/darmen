@@ -9,7 +9,7 @@ type Props = {
 }
 
 const items: Array<{ id: ShopItemId; icon: string; name: string; description: string }> = [
-  { id: 'diamond-gun', icon: '💎', name: 'Diamond Gun', description: 'A permanent monster-stunning weapon.' },
+  { id: 'diamond-gun', icon: '💎', name: 'Diamond Gun', description: 'A permanent upgrade to your free Gold Gun.' },
   { id: 'respawn-potion', icon: '❤️', name: 'Respawn Potion', description: 'Automatically revives you when caught.' },
   { id: 'invisibility-potion', icon: '👻', name: 'Invisibility Potion', description: 'Hides you from the monster for 10 seconds.' },
 ]

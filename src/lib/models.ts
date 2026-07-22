@@ -125,3 +125,17 @@ export function createDiamondGun() {
   group.add(body, barrel, grip)
   return group
 }
+
+export function createGoldGun() {
+  const group = new THREE.Group()
+  const gold = new THREE.MeshStandardMaterial({ color: 0xffc928, emissive: 0x6b3f00, metalness: 0.8, roughness: 0.2 })
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.16, 0.3), gold)
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.3, 8), gold)
+  barrel.rotation.x = Math.PI / 2
+  barrel.position.z = 0.28
+  const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.1), gold)
+  grip.position.set(0, -0.16, 0.02)
+  grip.rotation.x = -0.25
+  group.add(body, barrel, grip)
+  return group
+}

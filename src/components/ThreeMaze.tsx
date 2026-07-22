@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GameState } from '../lib/game'
 import { levels } from '../lib/game'
-import { createDemon, createDiamondGun, createMonster, createSurvivor } from '../lib/models'
+import { createDemon, createDiamondGun, createGoldGun, createMonster, createSurvivor } from '../lib/models'
 
 type Props = { game: GameState; color: number; jumpSignal: number; shotSignal: number; spiderDead: boolean; invisible: boolean; hasDiamondGun: boolean }
 const positionFor = (cell: number, size: number) => ({ x: (cell % size) - size / 2 + 0.5, z: Math.floor(cell / size) - size / 2 + 0.5 })
@@ -67,7 +67,7 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead, inv
     const monster = game.level >= 14 ? createDemon() : createMonster()
     const rageLight = new THREE.PointLight(0xff1b0f, 0, 7)
     scene.add(rageLight)
-    const gun = createDiamondGun()
+    const gun = hasDiamondGun ? createDiamondGun() : createGoldGun()
     gun.visible = false
     gun.position.set(0.13, 0.82, 0.27)
     survivor.add(gun)
@@ -155,7 +155,7 @@ export function ThreeMaze({ game, color, jumpSignal, shotSignal, spiderDead, inv
       }
       monster.position.lerp(new THREE.Vector3(monsterPos.x, 0, monsterPos.z), 0.12)
       monster.visible = !combat.current.spiderDead
-      gun.visible = hasDiamondGun && gunFrame < 90
+      gun.visible = gunFrame < 90
       if (current.status !== 'escaping') survivor.visible = !combat.current.invisible || Math.floor(frame / 8) % 2 === 0
       lamp.position.lerp(new THREE.Vector3(playerPos.x, 4, playerPos.z + 1.5), 0.1)
       monster.rotation.y = Math.sin(frame * 0.08) * 0.12

@@ -47,12 +47,12 @@ export default function App() {
   const escapeRewarded = useRef(false)
 
   const shoot = useCallback(() => {
-    if (!inventory.diamondGun || gunCooldown > 0) return
+    if (gunCooldown > 0) return
     setShotSignal((signal) => signal + 1)
     setSpiderDead(true)
     setGunCooldown(15)
     window.setTimeout(() => setSpiderDead(false), 5000)
-  }, [gunCooldown, inventory.diamondGun])
+  }, [gunCooldown])
 
   const purchase = (item: ShopItemId) => setInventory((current) => buyItem(current, item))
   const useInvisibility = () => {
@@ -299,7 +299,7 @@ export default function App() {
         </nav>
         <div className="action-controls">
           <button className="jump-button" onClick={() => setJumpSignal((signal) => signal + 1)}>JUMP · D</button>
-          <button className="weapon-button" onClick={shoot} disabled={!inventory.diamondGun || gunCooldown > 0}>{!inventory.diamondGun ? 'DIAMOND GUN · SHOP' : gunCooldown > 0 ? `COOLDOWN · ${gunCooldown}s` : 'FIRE · L'}</button>
+          <button className="weapon-button" onClick={shoot} disabled={gunCooldown > 0}>{gunCooldown > 0 ? `COOLDOWN · ${gunCooldown}s` : inventory.diamondGun ? 'DIAMOND GUN · FIRE · L' : 'GOLD GUN · FREE · L'}</button>
           <button className="potion-button" onClick={useInvisibility} disabled={inventory.invisibilityPotions < 1 || invisible}>{invisible ? 'INVISIBLE · 10s' : `INVISIBILITY · ${inventory.invisibilityPotions}`}</button>
           <button className="shop-button" onClick={() => setShopOpen(true)}>SHOP · 90 🪙</button>
           <button className={musicOn ? 'music-button active' : 'music-button'} onClick={toggleMusic}>{musicOn ? 'MUSIC OFF · U' : 'MUSIC · U'}</button>
